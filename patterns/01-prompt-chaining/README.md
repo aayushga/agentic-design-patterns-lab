@@ -64,6 +64,18 @@ Step 3: Build Structured Response
 Output
 ```
 
+## Implementation Options
+
+1. **Local no-API version (default)**
+   - File: `app.py`
+   - Uses deterministic local Python functions
+   - Runs without API keys or network access
+
+2. **Optional OpenAI-backed version**
+   - Folder: `openai_version/`
+   - Uses the official OpenAI Python SDK with `OPENAI_API_KEY`
+   - Mirrors the same 3-step chain with real model calls
+
 ## Run
 
 ```bash
