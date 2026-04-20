@@ -22,7 +22,7 @@ Each pattern includes:
 ## Pattern Roadmap (21 Patterns)
 
 - [x] 01. Prompt Chaining
-- [ ] 02. Routing
+- [x] 02. Routing
 - [ ] 03. Parallelization
 - [ ] 04. Reflection
 - [ ] 05. Tool Use
