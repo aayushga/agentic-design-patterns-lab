@@ -10,7 +10,9 @@ Routing is a control pattern with two core steps:
 1. **Intent detection** (figure out what kind of request we have)
 2. **Route selection** (send the request to the best matching handler)
 
-For this pattern, we use local Python logic (keyword matching) so it is easy to run, inspect, and test.
+For this pattern, the default implementation uses local Python logic (keyword matching) so it is easy to run, inspect, and test.
+
+An optional OpenAI-backed implementation is also available in `openai_version/` for model-based intent classification.
 
 ## Why it matters
 
@@ -56,9 +58,20 @@ Input -> Intent Detection -> Route Selection -> Handler -> Output
 
 ## Run
 
+### Local no-API version (default)
+
 ```bash
 python app.py
 python examples/basic_example.py
 python examples/advanced_example.py
 pytest tests/test_routing.py
 ```
+
+### Optional OpenAI-backed version
+
+```bash
+# from patterns/02-routing
+python openai_version/openai_router.py
+```
+
+To use the OpenAI version, set `OPENAI_API_KEY` first (see `openai_version/.env.example`).
