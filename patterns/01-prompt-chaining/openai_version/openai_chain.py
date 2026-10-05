@@ -12,9 +12,12 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List
 
-from openai import OpenAI
+if TYPE_CHECKING:
+    from openai import OpenAI
+
+DEFAULT_MODEL = "gpt-6-astra"
 
 
 @dataclass
@@ -28,28 +31,35 @@ class OpenAIChainResult:
 
 def _get_client() -> OpenAI:
     """Create an OpenAI client from OPENAI_API_KEY."""
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key:
         raise EnvironmentError(
             "OPENAI_API_KEY is not set. Add it to your environment before running this script."
         )
+    from openai import OpenAI
+
     return OpenAI(api_key=api_key)
 
 
-def _run_step(client: OpenAI, model: str, system_prompt: str, user_prompt: str) -> str:
-    """Run one chat completion step and return plain text output."""
-    response = client.chat.completions.create(
-        model=model,
-        temperature=0,
-        messages=[
+def _run_step(client: OpenAI, model: str | None, system_prompt: str, user_prompt: str) -> str:
+    """Run one Responses API step and return plain text output."""
+    response = client.responses.create(
+        model=model or os.getenv("OPENAI_MODEL", "").strip() or DEFAULT_MODEL,
+        reasoning={"effort": "low"},
+        input=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
     )
-    return response.choices[0].message.content.strip()
+    if getattr(response, "status", "completed") != "completed":
+        raise RuntimeError("OpenAI did not complete the chain step. Please retry.")
+    content = response.output_text
+    if not isinstance(content, str) or not content.strip():
+        raise RuntimeError("OpenAI returned no text for the chain step (possibly a refusal).")
+    return content.strip()
 
 
-def summarize_text(client: OpenAI, text: str, model: str = "gpt-4.1-mini") -> str:
+def summarize_text(client: OpenAI, text: str, model: str | None = None) -> str:
     """Step 1: summarize the raw input text."""
     return _run_step(
         client,
@@ -62,7 +72,7 @@ def summarize_text(client: OpenAI, text: str, model: str = "gpt-4.1-mini") -> st
     )
 
 
-def extract_key_themes(client: OpenAI, summary: str, model: str = "gpt-4.1-mini") -> List[str]:
+def extract_key_themes(client: OpenAI, summary: str, model: str | None = None) -> List[str]:
     """Step 2: extract key themes from the summary."""
     raw = _run_step(
         client,
@@ -77,13 +87,15 @@ def extract_key_themes(client: OpenAI, summary: str, model: str = "gpt-4.1-mini"
 
     try:
         parsed = json.loads(raw)
-        if isinstance(parsed, list) and all(isinstance(item, str) for item in parsed):
-            return parsed
+        if isinstance(parsed, list) and parsed and all(
+            isinstance(item, str) and item.strip() for item in parsed
+        ):
+            return [item.strip() for item in parsed]
     except json.JSONDecodeError:
         pass
 
-    # Fallback: split a comma-separated output if model did not return JSON.
-    return [part.strip(" -\n") for part in raw.split(",") if part.strip()]
+    # Invalid JSON must not masquerade as extracted themes.
+    return ["general"]
 
 
 def generate_structured_response(
@@ -91,7 +103,7 @@ def generate_structured_response(
     original_text: str,
     summary: str,
     themes: List[str],
-    model: str = "gpt-4.1-mini",
+    model: str | None = None,
 ) -> Dict[str, Any]:
     """Step 3: produce final structured response JSON."""
     raw = _run_step(
@@ -110,7 +122,14 @@ def generate_structured_response(
     try:
         parsed = json.loads(raw)
         if isinstance(parsed, dict):
-            return parsed
+            next_step = parsed.get("recommended_next_step")
+            if isinstance(next_step, str) and next_step.strip():
+                return {
+                    "input_length": len(original_text),
+                    "summary": summary,
+                    "themes": themes,
+                    "recommended_next_step": next_step.strip(),
+                }
     except json.JSONDecodeError:
         pass
 
@@ -119,12 +138,14 @@ def generate_structured_response(
         "input_length": len(original_text),
         "summary": summary,
         "themes": themes,
-        "recommended_next_step": raw,
+        "recommended_next_step": "Review the summary and themes before taking action.",
     }
 
 
-def run_prompt_chain(text: str, model: str = "gpt-4.1-mini") -> OpenAIChainResult:
+def run_prompt_chain(text: str, model: str | None = None) -> OpenAIChainResult:
     """Run the full OpenAI-backed prompt chaining workflow."""
+    if not text.strip():
+        raise ValueError("Please provide non-empty text.")
     client = _get_client()
     summary = summarize_text(client, text, model=model)
     themes = extract_key_themes(client, summary, model=model)
@@ -139,7 +160,12 @@ def main() -> None:
         "and standardize escalation handoffs across teams."
     )
 
-    result = run_prompt_chain(sample_text)
+    try:
+        result = run_prompt_chain(sample_text)
+    except (OSError, ValueError) as exc:
+        raise SystemExit(f"Configuration/input error: {exc}") from None
+    except Exception:
+        raise SystemExit("OpenAI chain failed. Check model access, connectivity, and API limits.") from None
 
     print("=== OpenAI Prompt Chaining Demo ===")
     print("Summary:", result.summary)

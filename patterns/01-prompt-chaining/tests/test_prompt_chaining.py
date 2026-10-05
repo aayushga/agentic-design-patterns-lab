@@ -1,17 +1,11 @@
 """Tests for the Prompt Chaining pattern demo."""
 
-from pathlib import Path
-import sys
+from importlib import import_module
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-from app import (
-    extract_key_themes,
-    run_prompt_chain,
-    summarize_text,
-)
+app = import_module("patterns.01-prompt-chaining.app")
+extract_key_themes = app.extract_key_themes
+run_prompt_chain = app.run_prompt_chain
+summarize_text = app.summarize_text
 
 
 def test_summarize_text_truncates_when_needed() -> None:

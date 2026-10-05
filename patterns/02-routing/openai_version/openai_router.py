@@ -9,8 +9,10 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 import json
 import os
-from typing import Any, Callable, Dict
+from typing import Callable, Dict
 
+
+DEFAULT_MODEL = "gpt-6-astra"
 
 ALLOWED_ROUTES = {"billing", "support", "sales", "unknown"}
 
@@ -67,13 +69,15 @@ def _build_handlers() -> Dict[str, Handler]:
     }
 
 
-def classify_intent_with_openai(user_input: str, model: str = "gpt-4.1-mini") -> Dict[str, str]:
+def classify_intent_with_openai(user_input: str, model: str | None = None) -> Dict[str, str]:
     """Classify intent using OpenAI and return route metadata.
 
     Returns a dict with `route`, `confidence`, and `reason`.
     Raises ValueError if OPENAI_API_KEY is missing.
     """
-    api_key = os.getenv("OPENAI_API_KEY")
+    if not user_input.strip():
+        raise ValueError("Please provide a non-empty request.")
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key:
         raise ValueError(
             "Missing OPENAI_API_KEY. Set it in your environment before running the OpenAI router."
@@ -92,36 +96,65 @@ def classify_intent_with_openai(user_input: str, model: str = "gpt-4.1-mini") ->
     )
 
     response = client.responses.create(
-        model=model,
+        model=model or os.getenv("OPENAI_MODEL", "").strip() or DEFAULT_MODEL,
+        reasoning={"effort": "low"},
         input=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_input},
         ],
-        text={"format": {"type": "json_object"}},
+        text={"format": {
+            "type": "json_schema",
+            "name": "intent_classification",
+            "strict": True,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "route": {"type": "string", "enum": sorted(ALLOWED_ROUTES)},
+                    "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
+                    "reason": {"type": "string"},
+                },
+                "required": ["route", "confidence", "reason"],
+                "additionalProperties": False,
+            },
+        }},
     )
 
-    raw_text = response.output_text
-    parsed: Dict[str, Any] = json.loads(raw_text)
+    fallback = {
+        "route": "unknown",
+        "confidence": "low",
+        "reason": "Model returned empty, malformed, or incomplete output; using 'unknown'.",
+    }
+    if getattr(response, "status", "completed") != "completed":
+        return fallback
+    try:
+        parsed = json.loads(response.output_text)
+    except (json.JSONDecodeError, TypeError):
+        return fallback
+    if not isinstance(parsed, dict):
+        return fallback
 
-    route = str(parsed.get("route", "unknown")).lower()
-    confidence = str(parsed.get("confidence", "low")).lower()
-    reason = str(parsed.get("reason", "No reason provided by model.")).strip()
+    route = parsed.get("route")
+    confidence = parsed.get("confidence")
+    reason = parsed.get("reason")
+    route = route.strip().lower() if isinstance(route, str) else ""
+    confidence = confidence.strip().lower() if isinstance(confidence, str) else "low"
+    reason = reason.strip() if isinstance(reason, str) else ""
 
     if route not in ALLOWED_ROUTES:
-        route = "unknown"
-        reason = (
-            "Model returned an invalid route; falling back to 'unknown'. "
-            f"Original reason: {reason}"
-        )
-        confidence = "low"
-
-    if confidence not in {"high", "medium", "low"}:
+        return {
+            "route": "unknown",
+            "confidence": "low",
+            "reason": "Model returned an invalid route; falling back to 'unknown'.",
+        }
+    if not reason:
+        return fallback
+    if confidence not in {"high", "medium", "low"} or route == "unknown":
         confidence = "low"
 
     return {"route": route, "confidence": confidence, "reason": reason}
 
 
-def route_with_openai(user_input: str, model: str = "gpt-4.1-mini") -> OpenAIRoutingResult:
+def route_with_openai(user_input: str, model: str | None = None) -> OpenAIRoutingResult:
     """Classify route via OpenAI, dispatch to handler, and return structured output."""
     classification = classify_intent_with_openai(user_input, model=model)
 
@@ -148,11 +181,9 @@ def main() -> None:
     try:
         result = route_with_openai(query)
     except ValueError as exc:
-        print(f"Configuration error: {exc}")
-        return
-    except Exception as exc:  # pragma: no cover - defensive UX guard for demo mode
-        print(f"OpenAI routing failed: {exc}")
-        return
+        raise SystemExit(f"Configuration/input error: {exc}") from None
+    except Exception:
+        raise SystemExit("OpenAI routing failed. Check model access, connectivity, and API limits.") from None
 
     print(json.dumps(asdict(result), indent=2))
 

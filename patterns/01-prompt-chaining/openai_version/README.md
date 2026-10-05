@@ -1,45 +1,67 @@
-# Optional OpenAI-Backed Prompt Chaining Version
+# Optional OpenAI-Backed Prompt Chaining
 
-This folder contains an **optional** implementation of Pattern 01 (Prompt Chaining) using the official OpenAI Python SDK.
+The default [local implementation](../app.py) runs without an API key or OpenAI SDK.
+This optional version uses the official SDK, Responses API, and `gpt-6-astra`.
 
-The main local version in `../app.py` remains the default no-API implementation. This version is for users who want to run the same pattern with a real model.
+## What It Does
 
-## What it does
+Runs three dependent model calls: summarize input, extract themes, and generate a
+structured response. Each step receives the preceding step's result.
 
-It runs a 3-step prompt chain:
-1. Summarize input text
-2. Extract key themes
-3. Generate a final structured response
+The result includes `summary`, `themes`, and `final_response`. The final response
+keeps `input_length`, `summary`, and `themes` from the known chain state and adds
+`recommended_next_step`.
 
-## Setup
+## Setup and Run
 
-1. Install dependencies (from the pattern folder):
-
-```bash
-pip install -r ../requirements.txt
-```
-
-2. Configure your API key:
+Use Python 3.10 or newer. Start from the repository root with your virtual environment active:
 
 ```bash
-cp .env.example .env
-# then add your real key to OPENAI_API_KEY
+cd patterns/01-prompt-chaining
+python -m pip install -r openai_version/requirements.txt
+cp openai_version/.env.example openai_version/.env
 ```
 
-3. Export the variable in your shell (example):
+Edit `openai_version/.env` locally, replacing the placeholder with your real API key.
+Then load it into your shell and run the example (macOS/Linux, bash or zsh):
 
 ```bash
-export OPENAI_API_KEY="your_api_key_here"
+set -a
+source openai_version/.env
+set +a
+python openai_version/openai_chain.py
 ```
 
-## Run
+The scripts read **exported environment variables**; copying or editing `.env`
+alone does not load it. Alternatively, export `OPENAI_API_KEY` and `OPENAI_MODEL`
+directly in your shell. `.env` is Git-ignored; never commit a real key.
+
+## Model Configuration
+
+`OPENAI_MODEL` defaults to `gpt-6-astra` when unset or blank. A Python `model=`
+argument overrides the environment. Requests use `reasoning={"effort": "low"}`
+and omit temperature, following [OpenAI's migration guidance](https://developers.openai.com/api/docs/guides/latest-model).
+Choose an override that supports Responses and low reasoning effort; Routing
+also needs structured outputs. You need API access to your selected model, and live
+runs incur API usage charges. This example is validated offline, not against a live model.
+
+## Failure Behavior
+
+- Missing or blank `OPENAI_API_KEY`: clear configuration error.
+- Blank input: rejected before any API request.
+- Malformed theme output: falls back to `["general"]`.
+- Malformed final output: preserves known fields and provides a safe review recommendation.
+- Empty, refused, or incomplete step: stops the chain with an error rather than passing bad data onward.
+- API/network errors: propagate to Python callers; the CLI reports a failure and exits nonzero.
+
+## Offline Tests
+
+From this pattern folder:
 
 ```bash
-python openai_chain.py
+python -m pip install -r requirements.txt
+python -m pytest
 ```
 
-## Notes
-
-- No secrets are hard-coded.
-- The script reads credentials from `OPENAI_API_KEY`.
-- If the model returns malformed JSON for a step, the code includes lightweight fallbacks to keep the demo runnable.
+Tests mock the SDK, verify model selection and output handling, and block network
+connections. They run without the SDK or a real API key.

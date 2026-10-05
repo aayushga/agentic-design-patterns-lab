@@ -1,14 +1,12 @@
 """Tests for the Routing pattern demo."""
 
-from pathlib import Path
-import sys
+from importlib import import_module
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-from app import route_input
-from examples.advanced_example import run_advanced_router
+app = import_module("patterns.02-routing.app")
+route_input = app.route_input
+run_advanced_router = import_module(
+    "patterns.02-routing.examples.advanced_example"
+).run_advanced_router
 
 
 def test_correct_route_selection() -> None:

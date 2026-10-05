@@ -26,29 +26,88 @@ Each pattern includes:
 - [ ] 03. Parallelization
 - [ ] 04. Reflection
 - [ ] 05. Tool Use
-- [ ] 06. ReAct (Reason + Act)
-- [ ] 07. Planning Agent
-- [ ] 08. Multi-Agent Collaboration
-- [ ] 09. Critic-Writer Loop
-- [ ] 10. Self-Consistency
-- [ ] 11. Debate Pattern
-- [ ] 12. Retrieval-Augmented Generation (RAG)
-- [ ] 13. Memory-Enhanced Agent
-- [ ] 14. Human-in-the-Loop (HITL)
-- [ ] 15. Guardrails & Validation
-- [ ] 16. Supervisor-Worker Agents
-- [ ] 17. Event-Driven Agents
-- [ ] 18. Autonomous Task Queue Agent
-- [ ] 19. Workflow Graph Orchestration
-- [ ] 20. Long-Horizon Task Decomposition
-- [ ] 21. Agent Evaluation Harness
+- [ ] 06. Planning
+- [ ] 07. Multi-Agent Collaboration
+- [ ] 08. Memory Management
+- [ ] 09. Learning and Adaptation
+- [ ] 10. Model Context Protocol (MCP)
+- [ ] 11. Goal Setting and Monitoring
+- [ ] 12. Exception Handling and Recovery
+- [ ] 13. Human-in-the-Loop
+- [ ] 14. Knowledge Retrieval (RAG)
+- [ ] 15. Inter-Agent Communication (A2A)
+- [ ] 16. Resource-Aware Optimization
+- [ ] 17. Reasoning Techniques
+- [ ] 18. Guardrails/Safety Patterns
+- [ ] 19. Evaluation and Monitoring
+- [ ] 20. Prioritization
+- [ ] 21. Exploration and Discovery
 
-## Current Focus
+The roadmap follows Antonio Gulli's *Agentic Design Patterns: A Hands-On Guide to
+Building Intelligent Systems*. Implementations are original, simplified Python
+exercises inspired by the chapters. ReAct, self-consistency, and related techniques
+can be explored within the relevant chapters instead of replacing the book's sequence.
 
-Pattern 1 lives in [`patterns/01-prompt-chaining/`](patterns/01-prompt-chaining/) and provides:
-- A local, no-API implementation
-- Basic and advanced runnable examples
-- Pytest tests for chaining logic
+## Current Progress
+
+- [Pattern 01: Prompt Chaining](patterns/01-prompt-chaining/): sequential summary,
+  theme extraction, and structured response.
+- [Pattern 02: Routing](patterns/02-routing/): intent classification and dispatch
+  to billing, support, sales, or a fallback handler.
+
+Both include a default local implementation, basic and advanced examples, an
+optional OpenAI implementation, and offline tests. Pattern 03: Parallelization is next.
+
+## Run and Test
+
+Use Python 3.10 or newer. From the repository root:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt
+python -m pytest
+python patterns/01-prompt-chaining/app.py
+python patterns/02-routing/app.py
+```
+
+The default examples use only the Python standard library. The test suite uses
+pytest, fake API responses, and blocks network connections; no API key is needed.
+You can also run `python -m pytest` from either pattern folder.
+
+## GitHub Actions
+
+[Python tests](https://github.com/aayushga/agentic-design-patterns-lab/actions/workflows/tests.yml)
+runs automatically on pushes and pull requests, using GitHub-hosted Ubuntu runners
+with Python 3.10, 3.12, and 3.14. It runs the combined suite, each pattern's suite
+independently, and all local examples. No OpenAI API key or SDK is required, and
+the tests make no live API calls.
+
+Review changes in a pull request's **Files changed** tab and results in **Checks**.
+Full logs are available under **Actions → Python tests**. Once the workflow is on
+the default branch, you can also start it manually with **Run workflow**.
+No local editor is required for review.
+
+## Optional OpenAI Versions
+
+- [Prompt Chaining setup](patterns/01-prompt-chaining/openai_version/README.md)
+- [Routing setup](patterns/02-routing/openai_version/README.md)
+
+Both use the official OpenAI Python SDK and the Responses API. The default model
+is `gpt-6-astra` with low reasoning effort. Set `OPENAI_MODEL` to override the model,
+or pass `model=` when calling the Python functions (which takes precedence).
+Overrides must support Responses and low reasoning effort; Routing also requires
+structured outputs. API usage is billed separately and requires access to the chosen model.
+The examples make three API requests for a chain and one for a routing decision.
+
+The SDK is installed separately using each `openai_version/requirements.txt`,
+so local-only users do not need it. Scripts read exported environment variables;
+they do **not** automatically load `.env` files. The setup guides include the export step.
+
+Model migration reference: [OpenAI GPT-6 guide](https://developers.openai.com/api/docs/guides/latest-model).
+The migration removes `temperature=0`, uses low reasoning effort, and makes model
+selection configurable. Offline tests verify request construction and application
+behavior; they do not measure live model quality, latency, or account access.
 
 ## Who This Is For
 

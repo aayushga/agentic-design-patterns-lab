@@ -60,18 +60,18 @@ Input -> Intent Detection -> Route Selection -> Handler -> Output
 
 ### Local no-API version (default)
 
+From `patterns/02-routing`:
+
 ```bash
 python app.py
 python examples/basic_example.py
 python examples/advanced_example.py
-pytest tests/test_routing.py
+python -m pytest
 ```
 
 ### Optional OpenAI-backed version
 
-```bash
-# from patterns/02-routing
-python openai_version/openai_router.py
-```
-
-To use the OpenAI version, set `OPENAI_API_KEY` first (see `openai_version/.env.example`).
+See [the OpenAI setup guide](openai_version/README.md) for SDK installation,
+exporting environment variables, and running `python openai_version/openai_router.py`.
+The default model is `gpt-6-astra`, configurable through `OPENAI_MODEL`.
+The local implementation remains available without API dependencies.
