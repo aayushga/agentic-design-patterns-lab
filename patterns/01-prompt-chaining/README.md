@@ -78,9 +78,18 @@ Output
 
 ## Run
 
+From `patterns/01-prompt-chaining`:
+
 ```bash
 python app.py
 python examples/basic_example.py
 python examples/advanced_example.py
-pytest
+python -m pytest
 ```
+
+## Optional OpenAI Setup
+
+See [the OpenAI setup guide](openai_version/README.md) for SDK installation,
+exporting environment variables, and running `python openai_version/openai_chain.py`.
+The default model is `gpt-6-astra`, configurable through `OPENAI_MODEL`.
+The local implementation remains available without API dependencies.

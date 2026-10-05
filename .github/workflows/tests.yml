@@ -1,0 +1,50 @@
+name: Python tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Python ${{ matrix.python-version }} offline tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.12', '3.14']
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: patterns/*/requirements.txt
+      - name: Install offline test dependencies
+        run: python -m pip install -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt
+      - name: Run complete test suite
+        run: python -m pytest -q
+      - name: Run each pattern independently
+        run: |
+          (cd patterns/01-prompt-chaining && python -m pytest -q)
+          (cd patterns/02-routing && python -m pytest -q)
+      - name: Run local examples
+        run: |
+          python patterns/01-prompt-chaining/app.py
+          python patterns/01-prompt-chaining/examples/basic_example.py
+          python patterns/01-prompt-chaining/examples/advanced_example.py
+          python patterns/02-routing/app.py
+          python patterns/02-routing/examples/basic_example.py
+          python patterns/02-routing/examples/advanced_example.py

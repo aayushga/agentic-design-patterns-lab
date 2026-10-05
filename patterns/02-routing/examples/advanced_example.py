@@ -12,7 +12,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app import detect_intent
+if __package__:
+    from ..app import detect_intent
+else:
+    from app import detect_intent
 
 
 @dataclass
