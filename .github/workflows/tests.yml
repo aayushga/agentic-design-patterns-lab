@@ -33,7 +33,7 @@ jobs:
           cache: pip
           cache-dependency-path: patterns/*/requirements.txt
       - name: Install offline test dependencies
-        run: python -m pip install -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt
+        run: python -m pip install -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt -r patterns/04-reflection/requirements.txt
       - name: Run complete test suite
         run: python -m pytest -q
       - name: Run each pattern independently
@@ -41,6 +41,7 @@ jobs:
           (cd patterns/01-prompt-chaining && python -m pytest -q)
           (cd patterns/02-routing && python -m pytest -q)
           (cd patterns/03-parallelization && python -m pytest -q)
+          (cd patterns/04-reflection && python -m pytest -q)
       - name: Run local examples
         run: |
           python patterns/01-prompt-chaining/app.py
@@ -52,3 +53,6 @@ jobs:
           python patterns/03-parallelization/app.py
           python patterns/03-parallelization/examples/basic_example.py
           python patterns/03-parallelization/examples/advanced_example.py
+          python patterns/04-reflection/app.py
+          python patterns/04-reflection/examples/basic_example.py
+          python patterns/04-reflection/examples/advanced_example.py
