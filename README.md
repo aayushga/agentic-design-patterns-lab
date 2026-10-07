@@ -25,7 +25,7 @@ Each pattern includes:
 - [x] 02. Routing
 - [x] 03. Parallelization
 - [x] 04. Reflection
-- [ ] 05. Tool Use
+- [x] 05. Tool Use
 - [ ] 06. Planning
 - [ ] 07. Multi-Agent Collaboration
 - [ ] 08. Memory Management
@@ -59,9 +59,11 @@ can be explored within the relevant chapters instead of replacing the book's seq
 
 - [Pattern 04: Reflection](patterns/04-reflection/): a support-reply draft,
   critique, and revision loop with explicit stopping conditions.
+- [Pattern 05: Tool Use](patterns/05-tool-use/): validated function calls,
+  observations, and dependent order lookup and calculation.
 
 Each includes a default local implementation, basic and advanced examples, an
-optional OpenAI implementation, and offline tests. Pattern 05: Tool Use is next.
+optional OpenAI implementation, and offline tests. Pattern 06: Planning is next.
 
 ## Run and Test
 
@@ -70,12 +72,13 @@ Use Python 3.10 or newer. From the repository root:
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt -r patterns/04-reflection/requirements.txt
+python -m pip install -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt -r patterns/04-reflection/requirements.txt -r patterns/05-tool-use/requirements.txt
 python -m pytest
 python patterns/01-prompt-chaining/app.py
 python patterns/02-routing/app.py
 python patterns/03-parallelization/app.py
 python patterns/04-reflection/app.py
+python patterns/05-tool-use/app.py
 ```
 
 The default examples use only the Python standard library. The test suite uses
@@ -101,6 +104,7 @@ No local editor is required for review.
 - [Routing setup](patterns/02-routing/openai_version/README.md)
 - [Parallelization setup](patterns/03-parallelization/openai_version/README.md)
 - [Reflection setup](patterns/04-reflection/openai_version/README.md)
+- [Tool Use setup](patterns/05-tool-use/openai_version/README.md)
 
 All use the official OpenAI Python SDK and the Responses API. The default model
 is `gpt-6-astra` with low reasoning effort. Set `OPENAI_MODEL` to override the model,
@@ -110,7 +114,8 @@ also require structured outputs. API usage is billed separately and requires acc
 The examples make three API requests for a chain, one for a routing decision, and
 up to three concurrent requests for parallel analysis. The parallel result is merged locally. Reflection makes up to six sequential
 requests with its default budget of two revisions, stopping earlier on approval
-or repeated drafts.
+or repeated drafts. Tool Use makes at most four model requests with its default
+budget of three tool calls; its tools execute locally using simulated data.
 
 The SDK is installed separately using each `openai_version/requirements.txt`,
 so local-only users do not need it. Scripts read exported environment variables;
