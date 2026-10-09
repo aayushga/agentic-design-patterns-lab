@@ -27,7 +27,7 @@ Each pattern includes:
 - [x] 04. Reflection
 - [x] 05. Tool Use
 - [x] 06. Planning
-- [ ] 07. Multi-Agent Collaboration
+- [x] 07. Multi-Agent Collaboration
 - [ ] 08. Memory Management
 - [ ] 09. Learning and Adaptation
 - [ ] 10. Model Context Protocol (MCP)
@@ -63,9 +63,11 @@ can be explored within the relevant chapters instead of replacing the book's seq
   observations, and dependent order lookup and calculation.
 - [Pattern 06: Planning](patterns/06-planning/): an explicit offsite plan,
   constraint validation, simulated execution, and bounded replanning.
+- [Pattern 07: Multi-Agent Collaboration](patterns/07-multi-agent-collaboration/):
+  supervisor delegation, specialist handoffs, and a combined support reply.
 
 Each includes a default local implementation, basic and advanced examples, an
-optional OpenAI implementation, and offline tests. Pattern 07: Multi-Agent Collaboration is next.
+optional OpenAI implementation, and offline tests. Pattern 08: Memory Management is next.
 
 ## Run and Test
 
@@ -74,7 +76,7 @@ Use Python 3.10 or newer. From the repository root:
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt -r patterns/04-reflection/requirements.txt -r patterns/05-tool-use/requirements.txt -r patterns/06-planning/requirements.txt
+python -m pip install -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt -r patterns/04-reflection/requirements.txt -r patterns/05-tool-use/requirements.txt -r patterns/06-planning/requirements.txt -r patterns/07-multi-agent-collaboration/requirements.txt
 python -m pytest
 python patterns/01-prompt-chaining/app.py
 python patterns/02-routing/app.py
@@ -82,6 +84,7 @@ python patterns/03-parallelization/app.py
 python patterns/04-reflection/app.py
 python patterns/05-tool-use/app.py
 python patterns/06-planning/app.py
+python patterns/07-multi-agent-collaboration/app.py
 ```
 
 The default examples use only the Python standard library. The test suite uses
@@ -109,11 +112,12 @@ No local editor is required for review.
 - [Reflection setup](patterns/04-reflection/openai_version/README.md)
 - [Tool Use setup](patterns/05-tool-use/openai_version/README.md)
 - [Planning setup](patterns/06-planning/openai_version/README.md)
+- [Multi-Agent Collaboration setup](patterns/07-multi-agent-collaboration/openai_version/README.md)
 
 All use the official OpenAI Python SDK and the Responses API. The default model
 is `gpt-6-astra` with low reasoning effort. Set `OPENAI_MODEL` to override the model,
 or pass `model=` when calling the Python functions (which takes precedence).
-Overrides must support Responses and low reasoning effort; Routing, Reflection, and Planning
+Overrides must support Responses and low reasoning effort; Routing, Reflection, Planning, and Multi-Agent Collaboration
 also require structured outputs; Tool Use requires function calling. API usage is billed separately and requires access to the chosen model.
 The examples make three API requests for a chain, one for a routing decision, and
 up to three concurrent requests for parallel analysis. The parallel result is merged locally. Reflection makes up to six sequential
@@ -121,7 +125,9 @@ requests with its default budget of two revisions, stopping earlier on approval
 or repeated drafts. Tool Use makes at most four model requests with its default
 budget of three tool calls; its tools execute locally using simulated data. Planning
 makes at most two model requests with its default one-replan budget and executes
-its validated plan locally against a fictional catalog.
+its validated plan locally against a fictional catalog. Multi-Agent Collaboration
+makes at most four sequential model requests for its supervisor, up to two
+specialists, and writer.
 
 The SDK is installed separately using each `openai_version/requirements.txt`,
 so local-only users do not need it. Scripts read exported environment variables;
