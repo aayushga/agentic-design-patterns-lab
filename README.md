@@ -28,7 +28,7 @@ Each pattern includes:
 - [x] 05. Tool Use
 - [x] 06. Planning
 - [x] 07. Multi-Agent Collaboration
-- [ ] 08. Memory Management
+- [x] 08. Memory Management
 - [ ] 09. Learning and Adaptation
 - [ ] 10. Model Context Protocol (MCP)
 - [ ] 11. Goal Setting and Monitoring
@@ -65,9 +65,11 @@ can be explored within the relevant chapters instead of replacing the book's seq
   constraint validation, simulated execution, and bounded replanning.
 - [Pattern 07: Multi-Agent Collaboration](patterns/07-multi-agent-collaboration/):
   supervisor delegation, specialist handoffs, and a combined support reply.
+- [Pattern 08: Memory Management](patterns/08-memory-management/): bounded chat
+  history, session state, and explicit SQLite preferences across sessions.
 
 Each includes a default local implementation, basic and advanced examples, an
-optional OpenAI implementation, and offline tests. Pattern 08: Memory Management is next.
+optional OpenAI implementation, and offline tests. Pattern 09: Learning and Adaptation is next.
 
 ## Run and Test
 
@@ -76,7 +78,7 @@ Use Python 3.10 or newer. From the repository root:
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt -r patterns/04-reflection/requirements.txt -r patterns/05-tool-use/requirements.txt -r patterns/06-planning/requirements.txt -r patterns/07-multi-agent-collaboration/requirements.txt
+python -m pip install -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt -r patterns/04-reflection/requirements.txt -r patterns/05-tool-use/requirements.txt -r patterns/06-planning/requirements.txt -r patterns/07-multi-agent-collaboration/requirements.txt -r patterns/08-memory-management/requirements.txt
 python -m pytest
 python patterns/01-prompt-chaining/app.py
 python patterns/02-routing/app.py
@@ -85,6 +87,7 @@ python patterns/04-reflection/app.py
 python patterns/05-tool-use/app.py
 python patterns/06-planning/app.py
 python patterns/07-multi-agent-collaboration/app.py
+python patterns/08-memory-management/app.py
 ```
 
 The default examples use only the Python standard library. The test suite uses
@@ -113,6 +116,7 @@ No local editor is required for review.
 - [Tool Use setup](patterns/05-tool-use/openai_version/README.md)
 - [Planning setup](patterns/06-planning/openai_version/README.md)
 - [Multi-Agent Collaboration setup](patterns/07-multi-agent-collaboration/openai_version/README.md)
+- [Memory Management setup](patterns/08-memory-management/openai_version/README.md)
 
 All use the official OpenAI Python SDK and the Responses API. The default model
 is `gpt-6-astra` with low reasoning effort. Set `OPENAI_MODEL` to override the model,
@@ -127,7 +131,9 @@ budget of three tool calls; its tools execute locally using simulated data. Plan
 makes at most two model requests with its default one-replan budget and executes
 its validated plan locally against a fictional catalog. Multi-Agent Collaboration
 makes at most four sequential model requests for its supervisor, up to two
-specialists, and writer.
+specialists, and writer. Memory Management makes one request per ordinary chat
+turn, while explicit memory controls run locally; its interactive CLI defaults
+to at most five model requests per run.
 
 The SDK is installed separately using each `openai_version/requirements.txt`,
 so local-only users do not need it. Scripts read exported environment variables;

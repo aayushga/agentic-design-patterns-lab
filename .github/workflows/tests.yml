@@ -33,7 +33,7 @@ jobs:
           cache: pip
           cache-dependency-path: patterns/*/requirements.txt
       - name: Install offline test dependencies
-        run: python -m pip install -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt -r patterns/04-reflection/requirements.txt -r patterns/05-tool-use/requirements.txt -r patterns/06-planning/requirements.txt -r patterns/07-multi-agent-collaboration/requirements.txt
+        run: python -m pip install -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt -r patterns/04-reflection/requirements.txt -r patterns/05-tool-use/requirements.txt -r patterns/06-planning/requirements.txt -r patterns/07-multi-agent-collaboration/requirements.txt -r patterns/08-memory-management/requirements.txt
       - name: Run complete test suite
         run: python -m pytest -q
       - name: Run each pattern independently
@@ -45,6 +45,7 @@ jobs:
           (cd patterns/05-tool-use && python -m pytest -q)
           (cd patterns/06-planning && python -m pytest -q)
           (cd patterns/07-multi-agent-collaboration && python -m pytest -q)
+          (cd patterns/08-memory-management && python -m pytest -q)
       - name: Run local examples
         run: |
           python patterns/01-prompt-chaining/app.py
@@ -68,3 +69,6 @@ jobs:
           python patterns/07-multi-agent-collaboration/app.py
           python patterns/07-multi-agent-collaboration/examples/basic_example.py
           python patterns/07-multi-agent-collaboration/examples/advanced_example.py
+          python patterns/08-memory-management/app.py
+          python patterns/08-memory-management/examples/basic_example.py
+          python patterns/08-memory-management/examples/advanced_example.py
