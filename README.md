@@ -29,7 +29,7 @@ Each pattern includes:
 - [x] 06. Planning
 - [x] 07. Multi-Agent Collaboration
 - [x] 08. Memory Management
-- [ ] 09. Learning and Adaptation
+- [x] 09. Learning and Adaptation
 - [ ] 10. Model Context Protocol (MCP)
 - [ ] 11. Goal Setting and Monitoring
 - [ ] 12. Exception Handling and Recovery
@@ -67,9 +67,11 @@ can be explored within the relevant chapters instead of replacing the book's seq
   supervisor delegation, specialist handoffs, and a combined support reply.
 - [Pattern 08: Memory Management](patterns/08-memory-management/): bounded chat
   history, session state, and explicit SQLite preferences across sessions.
+- [Pattern 09: Learning and Adaptation](patterns/09-learning-and-adaptation/):
+  explicit feedback updates a contextual reply-strategy policy.
 
 Each includes a default local implementation, basic and advanced examples, an
-optional OpenAI implementation, and offline tests. Pattern 09: Learning and Adaptation is next.
+optional OpenAI implementation, and offline tests. Pattern 10: Model Context Protocol (MCP) is next.
 
 ## Run and Test
 
@@ -78,7 +80,7 @@ Use Python 3.10 or newer. From the repository root:
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt -r patterns/04-reflection/requirements.txt -r patterns/05-tool-use/requirements.txt -r patterns/06-planning/requirements.txt -r patterns/07-multi-agent-collaboration/requirements.txt -r patterns/08-memory-management/requirements.txt
+python -m pip install -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt -r patterns/04-reflection/requirements.txt -r patterns/05-tool-use/requirements.txt -r patterns/06-planning/requirements.txt -r patterns/07-multi-agent-collaboration/requirements.txt -r patterns/08-memory-management/requirements.txt -r patterns/09-learning-and-adaptation/requirements.txt
 python -m pytest
 python patterns/01-prompt-chaining/app.py
 python patterns/02-routing/app.py
@@ -88,6 +90,7 @@ python patterns/05-tool-use/app.py
 python patterns/06-planning/app.py
 python patterns/07-multi-agent-collaboration/app.py
 python patterns/08-memory-management/app.py
+python patterns/09-learning-and-adaptation/app.py
 ```
 
 The default examples use only the Python standard library. The test suite uses
@@ -117,11 +120,12 @@ No local editor is required for review.
 - [Planning setup](patterns/06-planning/openai_version/README.md)
 - [Multi-Agent Collaboration setup](patterns/07-multi-agent-collaboration/openai_version/README.md)
 - [Memory Management setup](patterns/08-memory-management/openai_version/README.md)
+- [Learning and Adaptation setup](patterns/09-learning-and-adaptation/openai_version/README.md)
 
 All use the official OpenAI Python SDK and the Responses API. The default model
 is `gpt-6-astra` with low reasoning effort. Set `OPENAI_MODEL` to override the model,
 or pass `model=` when calling the Python functions (which takes precedence).
-Overrides must support Responses and low reasoning effort; Routing, Reflection, Planning, and Multi-Agent Collaboration
+Overrides must support Responses and low reasoning effort; Routing, Reflection, Planning, Multi-Agent Collaboration, and Learning and Adaptation
 also require structured outputs; Tool Use requires function calling. API usage is billed separately and requires access to the chosen model.
 The examples make three API requests for a chain, one for a routing decision, and
 up to three concurrent requests for parallel analysis. The parallel result is merged locally. Reflection makes up to six sequential
@@ -133,7 +137,9 @@ its validated plan locally against a fictional catalog. Multi-Agent Collaboratio
 makes at most four sequential model requests for its supervisor, up to two
 specialists, and writer. Memory Management makes one request per ordinary chat
 turn, while explicit memory controls run locally; its interactive CLI defaults
-to at most five model requests per run.
+to at most five model requests per run. Learning and Adaptation makes one request
+per generated reply, with local feedback updates and a default five-attempt CLI
+budget; it changes the application policy, not model weights.
 
 The SDK is installed separately using each `openai_version/requirements.txt`,
 so local-only users do not need it. Scripts read exported environment variables;
