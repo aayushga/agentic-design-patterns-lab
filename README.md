@@ -31,7 +31,7 @@ Each pattern includes:
 - [x] 08. Memory Management
 - [x] 09. Learning and Adaptation
 - [x] 10. Model Context Protocol (MCP)
-- [ ] 11. Goal Setting and Monitoring
+- [x] 11. Goal Setting and Monitoring
 - [ ] 12. Exception Handling and Recovery
 - [ ] 13. Human-in-the-Loop
 - [ ] 14. Knowledge Retrieval (RAG)
@@ -72,18 +72,21 @@ can be explored within the relevant chapters instead of replacing the book's seq
 - [Pattern 10: Model Context Protocol](patterns/10-model-context-protocol/): real
   local MCP discovery, tools, resources, prompts, and an optional model bridge.
 
+- [Pattern 11: Goal Setting and Monitoring](patterns/11-goal-setting-and-monitoring/):
+  fixed triage goals, measured progress, adaptation, and bounded stopping.
+
 Each includes a default local implementation, basic and advanced examples, an
-optional OpenAI implementation, and offline tests. Pattern 11: Goal Setting and Monitoring is next.
+optional OpenAI implementation, and offline tests. Pattern 12: Exception Handling and Recovery is next.
 
 ## Run and Test
 
 Use Python 3.11 or newer for the full lab (the MCP SDK v2 requirement).
-Patterns 01–09 also support Python 3.10. From the repository root:
+Patterns 01–09 and 11 also support Python 3.10. From the repository root:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install --only-binary=:all: -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt -r patterns/04-reflection/requirements.txt -r patterns/05-tool-use/requirements.txt -r patterns/06-planning/requirements.txt -r patterns/07-multi-agent-collaboration/requirements.txt -r patterns/08-memory-management/requirements.txt -r patterns/09-learning-and-adaptation/requirements.txt -r patterns/10-model-context-protocol/requirements.txt
+python -m pip install --only-binary=:all: -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt -r patterns/04-reflection/requirements.txt -r patterns/05-tool-use/requirements.txt -r patterns/06-planning/requirements.txt -r patterns/07-multi-agent-collaboration/requirements.txt -r patterns/08-memory-management/requirements.txt -r patterns/09-learning-and-adaptation/requirements.txt -r patterns/10-model-context-protocol/requirements.txt -r patterns/11-goal-setting-and-monitoring/requirements.txt
 python -m pytest
 python patterns/01-prompt-chaining/app.py
 python patterns/02-routing/app.py
@@ -95,9 +98,10 @@ python patterns/07-multi-agent-collaboration/app.py
 python patterns/08-memory-management/app.py
 python patterns/09-learning-and-adaptation/app.py
 python patterns/10-model-context-protocol/app.py
+python patterns/11-goal-setting-and-monitoring/app.py
 ```
 
-Patterns 01–09 use only the Python standard library for local examples.
+Patterns 01–09 and 11 use only the Python standard library for local examples.
 Pattern 10 uses the free official MCP SDK and local stdio subprocesses. The test suite uses
 pytest, fake API responses, and blocks network connections; no API key is needed.
 You can also run `python -m pytest` from any pattern folder.
@@ -107,7 +111,7 @@ You can also run `python -m pytest` from any pattern folder.
 [Python tests](https://github.com/aayushga/agentic-design-patterns-lab/actions/workflows/tests.yml)
 runs automatically on pushes and pull requests, using GitHub-hosted Ubuntu runners
 with Python 3.10, 3.11, 3.12, and 3.14. It runs the combined suite, each pattern's
-suite independently, and local examples. Python 3.10 covers Patterns 01–09; the
+suite independently, and local examples. Python 3.10 covers Patterns 01–09 and 11; the
 newer versions also run the real MCP protocol tests and demos. No OpenAI API key
 or SDK is required, and the tests make no live API calls.
 
@@ -128,11 +132,12 @@ No local editor is required for review.
 - [Memory Management setup](patterns/08-memory-management/openai_version/README.md)
 - [Learning and Adaptation setup](patterns/09-learning-and-adaptation/openai_version/README.md)
 - [MCP + OpenAI setup](patterns/10-model-context-protocol/openai_version/README.md)
+- [Goal Setting and Monitoring setup](patterns/11-goal-setting-and-monitoring/openai_version/README.md)
 
 All use the official OpenAI Python SDK and the Responses API. The default model
 is `gpt-6-astra` with low reasoning effort. Set `OPENAI_MODEL` to override the model,
 or pass `model=` when calling the Python functions (which takes precedence).
-Overrides must support Responses and low reasoning effort; Routing, Reflection, Planning, Multi-Agent Collaboration, and Learning and Adaptation
+Overrides must support Responses and low reasoning effort; Routing, Reflection, Planning, Multi-Agent Collaboration, Learning and Adaptation, and Goal Setting and Monitoring
 also require structured outputs; Tool Use and MCP require function calling. API usage is billed separately and requires access to the chosen model.
 The examples make three API requests for a chain, one for a routing decision, and
 up to three concurrent requests for parallel analysis. The parallel result is merged locally. Reflection makes up to six sequential
@@ -148,7 +153,9 @@ to at most five model requests per run. Learning and Adaptation makes one reques
 per generated reply, with local feedback updates and a default five-attempt CLI
 budget; it changes the application policy, not model weights. MCP allows at most
 three model requests with its default two-tool budget; discovery and local
-protocol calls do not incur API charges.
+protocol calls do not incur API charges. Goal Setting and Monitoring makes at most
+six requests with its default action budget, stopping on measured completion,
+stalls, or its cooperative time deadline; ticket actions and monitoring are local.
 
 The SDK is installed separately using each `openai_version/requirements.txt`,
 so local-only users do not need it. Scripts read exported environment variables;
