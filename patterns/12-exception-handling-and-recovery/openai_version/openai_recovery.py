@@ -123,6 +123,12 @@ def run_openai_recovery(ticket_id: str = "T-101", *, scenario: str = "healthy",
                 )
             except (openai.APIConnectionError, openai.APIStatusError) as exc:
                 raise classify_sdk_error(exc, openai) from None
+            # HTTP success can still contain a failed generation. Classify its
+            # safe error code before treating non-completed output as invalid.
+            if response.status == "failed":
+                code = getattr(getattr(response, "error", None), "code", None)
+                if code in ("server_error", "rate_limit_exceeded"):
+                    raise TransientFailure("rate_limited" if code == "rate_limit_exceeded" else "server_error")
             if response.status != "completed":
                 raise InvalidOutput("incomplete_model_response")
             if not isinstance(response.output_text, str) or not response.output_text.strip():

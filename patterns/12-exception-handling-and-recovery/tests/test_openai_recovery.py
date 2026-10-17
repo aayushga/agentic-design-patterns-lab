@@ -31,6 +31,11 @@ def selection(step="request_invoice_details", ticket_id="T-101"):
     return NS(status="completed", output_text=json.dumps({"ticket_id": ticket_id, "next_step": step}))
 
 
+def failed_response(code):
+    return NS(status="failed", output_text="",
+              error=NS(code=code, message="Sensitive raw generation diagnostic: do not expose"))
+
+
 @pytest.fixture
 def sdk(monkeypatch):
     def install(*outcomes):
@@ -90,6 +95,41 @@ def test_exhausted_model_requests_use_local_rule_and_preserve_cache_warning(sdk)
     assert len(requests) == 2 and clients[0]["closed"]
     assert "Older cached" in result.message and "local rule" in result.message
     assert json.loads(requests[0]["input"])["lookup_status"] == "degraded"
+
+
+@pytest.mark.parametrize("code,expected_code", [("server_error", "server_error"), ("rate_limit_exceeded", "rate_limited")])
+def test_transient_failed_response_retries_before_fallback(sdk, code, expected_code):
+    requests, clients = sdk(failed_response(code), selection())
+    waits = []
+    result = module.run_openai_recovery(sleep=waits.append, jitter=lambda: 1)
+    recovery = result.model_selection
+    assert recovery.status == "recovered" and recovery.primary_attempts == len(requests) == 2
+    assert waits == [0.25] and recovery.events[0].code == expected_code
+    assert all(e.stage == "primary" for e in recovery.events) and clients[0]["closed"]
+    assert "Sensitive raw" not in json.dumps(asdict(result))
+
+
+@pytest.mark.parametrize("code", ["server_error", "rate_limit_exceeded"])
+@pytest.mark.parametrize("attempts", [1, 2])
+def test_failed_response_exhausts_exact_budget_then_uses_local_rule(sdk, code, attempts):
+    requests, clients = sdk(*(failed_response(code) for _ in range(attempts)))
+    waits = []
+    result = module.run_openai_recovery(model_policy=app.RetryPolicy(max_attempts=attempts),
+                                      sleep=waits.append, jitter=lambda: 1)
+    recovery = result.model_selection
+    assert recovery.status == "degraded" and recovery.value == "request_invoice_details"
+    assert recovery.primary_attempts == len(requests) == attempts and len(waits) == attempts - 1
+    assert sum(e.stage == "fallback" for e in recovery.events) == 1 and clients[0]["closed"]
+    assert "Sensitive raw" not in json.dumps(asdict(result))
+
+
+@pytest.mark.parametrize("code", ["invalid_prompt", "unknown_future_error", None])
+def test_non_transient_failed_response_does_not_retry(sdk, code):
+    requests, clients = sdk(failed_response(code))
+    result = execute()
+    assert len(requests) == 1 and result.model_selection.status == "degraded" and clients[0]["closed"]
+    assert result.model_selection.events[0].code == "incomplete_model_response"
+    assert "Sensitive raw" not in json.dumps(asdict(result))
 
 
 @pytest.mark.parametrize("error", [StatusFailure(401), StatusFailure(403), StatusFailure(400),

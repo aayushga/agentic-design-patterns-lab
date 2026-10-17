@@ -48,12 +48,17 @@ configurable from 1 to 5. Both the lookup and model use the same recovery contro
 | Model outcome | Application behavior |
 | --- | --- |
 | Connection failure, timeout, HTTP 408/409/5xx | Retry within the attempt budget |
+| Response object with `status="failed"` and `server_error` or `rate_limit_exceeded` | Retry within the same model attempt budget, even though no HTTP exception was raised |
 | HTTP 429 with `rate_limit_exceeded` or `slow_down` | Retry according to bounded wait policy |
 | Quota/billing or unrecognized HTTP 429 | Stop without retries or model fallback |
 | HTTP 400/401/403/404/422 or other terminal status | Stop and report a safe classification |
 | Exhausted transient failures | Use one validated local rule, labelled degraded |
 | Malformed/incomplete/empty/refused response or invalid selection | Reject the output and use the local rule without another model request |
 | Unexpected SDK/application bug | Propagate; the client still closes |
+
+Other failed response objects, including missing or unrecognized error codes, use
+the existing non-completed-output fallback path without automatic retries. Failure
+messages from response objects are not copied into the result.
 
 The adapter reads `retry-after-ms`, numeric `Retry-After`, and HTTP-date
 `Retry-After`. Valid server delays are respected; a delay beyond the policy's
