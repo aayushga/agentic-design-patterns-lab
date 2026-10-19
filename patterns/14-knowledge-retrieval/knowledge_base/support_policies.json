@@ -1,0 +1,37 @@
+[
+  {
+    "doc_id": "refunds-current",
+    "title": "Refund policy (fictional DemoDesk)",
+    "revision": 2,
+    "state": "current",
+    "body": "Refund requests for DemoDesk subscriptions must be submitted within 14 days of the charge date. Include the invoice reference and charge date.\n\nSubmitting a refund request does not guarantee approval. Support reviews eligibility before any refund decision."
+  },
+  {
+    "doc_id": "refunds-archived",
+    "title": "Archived refund policy (fictional DemoDesk)",
+    "revision": 1,
+    "state": "archived",
+    "body": "Refund requests for DemoDesk subscriptions must be submitted within 30 days of the charge date. This older policy has been replaced."
+  },
+  {
+    "doc_id": "cancellation",
+    "title": "Cancellation policy (fictional DemoDesk)",
+    "revision": 1,
+    "state": "current",
+    "body": "Canceling a DemoDesk subscription stops renewal at the end of the current billing period. Access remains available until that period ends.\n\nCancellation does not automatically refund earlier charges. Refund requests follow the separate refund policy."
+  },
+  {
+    "doc_id": "duplicate-charges",
+    "title": "Duplicate charge reports (fictional DemoDesk)",
+    "revision": 1,
+    "state": "current",
+    "body": "If a DemoDesk customer reports a duplicate charge, collect the invoice reference and both charge dates. A reported duplicate is not a verified billing error.\n\nSupport must check the billing records before confirming whether a charge was duplicated. This demo has no account access and cannot perform refunds."
+  },
+  {
+    "doc_id": "upload-errors",
+    "title": "Upload troubleshooting (fictional DemoDesk)",
+    "revision": 1,
+    "state": "current",
+    "body": "When DemoDesk uploads fail, collect the exact error message, app version, and file type. Ask whether the failure repeats with a small test file.\n\nAn upload report does not confirm a root cause. Escalate persistent failures to a technical specialist."
+  }
+]
