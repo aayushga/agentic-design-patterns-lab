@@ -35,7 +35,7 @@ Each pattern includes:
 - [x] 12. Exception Handling and Recovery
 - [x] 13. Human-in-the-Loop
 - [x] 14. Knowledge Retrieval (RAG)
-- [ ] 15. Inter-Agent Communication (A2A)
+- [x] 15. Inter-Agent Communication (A2A)
 - [ ] 16. Resource-Aware Optimization
 - [ ] 17. Reasoning Techniques
 - [ ] 18. Guardrails/Safety Patterns
@@ -84,18 +84,21 @@ can be explored within the relevant chapters instead of replacing the book's seq
 - [Pattern 14: Knowledge Retrieval (RAG)](patterns/14-knowledge-retrieval/):
   paragraph retrieval, bounded evidence, source citations, and abstention.
 
+- [Pattern 15: Inter-Agent Communication (A2A)](patterns/15-inter-agent-communication/):
+  Agent Card discovery, real JSON-RPC delegation, resumable tasks, and result artifacts.
+
 Each includes a default local implementation, basic and advanced examples, an
-optional OpenAI implementation, and offline tests. Pattern 15: Inter-Agent Communication (A2A) is next.
+optional OpenAI implementation, and offline tests. Pattern 16: Resource-Aware Optimization is next.
 
 ## Run and Test
 
 Use Python 3.11 or newer for the full lab (the MCP SDK v2 requirement).
-Patterns 01–09 and 11–14 also support Python 3.10. From the repository root:
+Patterns 01–09 and 11–15 also support Python 3.10. From the repository root:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install --only-binary=:all: -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt -r patterns/04-reflection/requirements.txt -r patterns/05-tool-use/requirements.txt -r patterns/06-planning/requirements.txt -r patterns/07-multi-agent-collaboration/requirements.txt -r patterns/08-memory-management/requirements.txt -r patterns/09-learning-and-adaptation/requirements.txt -r patterns/10-model-context-protocol/requirements.txt -r patterns/11-goal-setting-and-monitoring/requirements.txt -r patterns/12-exception-handling-and-recovery/requirements.txt -r patterns/13-human-in-the-loop/requirements.txt -r patterns/14-knowledge-retrieval/requirements.txt
+python -m pip install --only-binary=:all: -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt -r patterns/04-reflection/requirements.txt -r patterns/05-tool-use/requirements.txt -r patterns/06-planning/requirements.txt -r patterns/07-multi-agent-collaboration/requirements.txt -r patterns/08-memory-management/requirements.txt -r patterns/09-learning-and-adaptation/requirements.txt -r patterns/10-model-context-protocol/requirements.txt -r patterns/11-goal-setting-and-monitoring/requirements.txt -r patterns/12-exception-handling-and-recovery/requirements.txt -r patterns/13-human-in-the-loop/requirements.txt -r patterns/14-knowledge-retrieval/requirements.txt -r patterns/15-inter-agent-communication/requirements.txt
 python -m pytest
 python patterns/01-prompt-chaining/app.py
 python patterns/02-routing/app.py
@@ -111,10 +114,12 @@ python patterns/11-goal-setting-and-monitoring/app.py
 python patterns/12-exception-handling-and-recovery/app.py
 python patterns/13-human-in-the-loop/app.py
 python patterns/14-knowledge-retrieval/app.py
+python patterns/15-inter-agent-communication/app.py
 ```
 
 Patterns 01–09 and 11–14 use only the Python standard library for local examples.
-Pattern 10 uses the free official MCP SDK and local stdio subprocesses. The test suite uses
+Pattern 10 uses the free official MCP SDK and local stdio subprocesses. Pattern 15
+uses the free official A2A SDK and in-memory HTTP transport. The test suite uses
 pytest, fake API responses, and blocks network connections; no API key is needed.
 You can also run `python -m pytest` from any pattern folder.
 
@@ -123,7 +128,7 @@ You can also run `python -m pytest` from any pattern folder.
 [Python tests](https://github.com/aayushga/agentic-design-patterns-lab/actions/workflows/tests.yml)
 runs automatically on pushes and pull requests, using GitHub-hosted Ubuntu runners
 with Python 3.10, 3.11, 3.12, and 3.14. It runs the combined suite, each pattern's
-suite independently, and local examples. Python 3.10 covers Patterns 01–09 and 11–14; the
+suite independently, and local examples. Python 3.10 covers Patterns 01–09 and 11–15; the
 newer versions also run the real MCP protocol tests and demos. No OpenAI API key
 or SDK is required, and the tests make no live API calls.
 
@@ -148,11 +153,12 @@ No local editor is required for review.
 - [Exception Handling and Recovery setup](patterns/12-exception-handling-and-recovery/openai_version/README.md)
 - [Human-in-the-Loop setup](patterns/13-human-in-the-loop/openai_version/README.md)
 - [Knowledge Retrieval setup](patterns/14-knowledge-retrieval/openai_version/README.md)
+- [A2A + OpenAI setup](patterns/15-inter-agent-communication/openai_version/README.md)
 
 All use the official OpenAI Python SDK and the Responses API. The default model
 is `gpt-6-astra` with low reasoning effort. Set `OPENAI_MODEL` to override the model,
 or pass `model=` when calling the Python functions (which takes precedence).
-Overrides must support Responses and low reasoning effort; Routing, Reflection, Planning, Multi-Agent Collaboration, Learning and Adaptation, Goal Setting and Monitoring, Exception Handling and Recovery, Human-in-the-Loop, and Knowledge Retrieval
+Overrides must support Responses and low reasoning effort; Routing, Reflection, Planning, Multi-Agent Collaboration, Learning and Adaptation, Goal Setting and Monitoring, Exception Handling and Recovery, Human-in-the-Loop, Knowledge Retrieval, and Inter-Agent Communication
 also require structured outputs; Tool Use and MCP require function calling. API usage is billed separately and requires access to the chosen model.
 The examples make three API requests for a chain, one for a routing decision, and
 up to three concurrent requests for parallel analysis. The parallel result is merged locally. Reflection makes up to six sequential
@@ -179,7 +185,10 @@ edits, approval, rejection, and simulated dispatch run locally without more requ
 Knowledge Retrieval uses free local BM25 retrieval and at most one model synthesis
 request; no qualifying evidence means no model request. It uses no embedding API
 or vector database. Citation validation checks source IDs/excerpts, not semantic
-entailment of every generated claim.
+entailment of every generated claim. Inter-Agent Communication makes at most one
+model attempt for a complete valid ticket in its CLI; discovery, missing-input
+follow-ups, and task retrieval are local. The host owns protocol state and publishes
+a validated report artifact; the model does not choose endpoints or execute actions.
 
 The SDK is installed separately using each `openai_version/requirements.txt`,
 so local-only users do not need it. Scripts read exported environment variables;
