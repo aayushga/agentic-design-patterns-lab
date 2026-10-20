@@ -182,3 +182,40 @@ def test_wrong_context_id_cannot_resume_task():
                 await c.send(TICKET, task_id=task.id, context_id="wrong-context")
             assert (await c.get(task.id)).status.state == TaskState.TASK_STATE_INPUT_REQUIRED
     run(scenario())
+
+
+@pytest.mark.parametrize("field", ["summary", "next_step"])
+@pytest.mark.parametrize("padding,leading", [
+    pytest.param(1000, False, id="trailing-spaces"),
+    pytest.param(1000, True, id="leading-spaces"),
+    pytest.param(1000000, False, id="million-trailing-spaces"),
+])
+def test_report_length_counts_whitespace(field, padding, leading):
+    text = " " * padding + "x" if leading else "x" + " " * padding
+    report = {"priority": "normal", "summary": "Issue reported.", "next_step": "Request review.", field: text}
+    with pytest.raises(ValueError, match="report text"):
+        app.validate_report(report)
+
+
+@pytest.mark.parametrize("field", ["summary", "next_step"])
+def test_report_accepts_exact_raw_length_limit(field):
+    text = " " + "x" * 998 + " "
+    report = {"priority": "normal", "summary": "Issue reported.", "next_step": "Request review.", field: text}
+    assert len(text) == 1000
+    assert app.validate_report(report)[field] == text
+
+
+@pytest.mark.parametrize("field", ["summary", "next_step"])
+def test_padded_oversize_report_is_not_published(field):
+    async def respond(ticket):
+        return {"priority": "normal", "summary": "Issue reported.", "next_step": "Request review.",
+                field: "x" + " " * 1000}
+    async def scenario():
+        async with app.local_session(respond) as c:
+            task = await c.send(TICKET)
+            assert task.status.state == TaskState.TASK_STATE_FAILED
+            assert not task.artifacts
+            stored = await c.get(task.id)
+            assert stored.status.state == TaskState.TASK_STATE_FAILED
+            assert not stored.artifacts
+    run(scenario())

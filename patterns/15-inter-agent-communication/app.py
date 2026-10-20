@@ -69,7 +69,9 @@ def validate_report(value: object) -> dict:
     if value["priority"] not in ("normal", "high"):
         raise ValueError("Invalid specialist priority")
     for field in ("summary", "next_step"):
-        if not isinstance(value[field], str) or not 1 <= len(value[field].strip()) <= 1000:
+        if (not isinstance(value[field], str)
+                or not 1 <= len(value[field]) <= 1000
+                or not value[field].strip()):
             raise ValueError("Invalid specialist report text")
     return value
 

@@ -100,3 +100,18 @@ def test_invalid_ticket_makes_no_model_request(monkeypatch):
     asyncio.run(scenario())
     assert requests == []
     assert lifecycle == ["open", "closed"]
+
+
+@pytest.mark.parametrize("field", ["summary", "next_step"])
+def test_model_padded_oversize_report_fails_without_artifact(monkeypatch, field):
+    report = {**REPORT, field: " " * 1000 + "x"}
+    requests, _, lifecycle = fake_sdk(monkeypatch, output=json.dumps(report))
+    async def scenario():
+        async with mod.openai_session() as c:
+            task = await c.send(TICKET)
+            result = app.task_output(task)
+            assert result["state"] == "failed"
+            assert result["artifacts"] == []
+    asyncio.run(scenario())
+    assert len(requests) == 1
+    assert lifecycle == ["open", "closed"]

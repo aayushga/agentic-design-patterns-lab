@@ -92,6 +92,9 @@ report generation completed; no refund, message, or account change is performed.
 - At most three ticket submissions per task in this session. The fourth is rejected.
   A responder gets one attempt and a cooperative 35-second deadline. SDK persistence
   tracks task state; a separate per-task counter avoids asynchronous history races.
+- Each report summary and next step must contain non-whitespace text and be at
+  most 1000 characters **including leading and trailing whitespace**. Oversize
+  reports fail the task without publishing an artifact.
 - Each complete valid ticket produces at most one artifact after report validation.
   Failed generation never becomes a successful fallback report.
 - Task store and counters are in memory for the session and disappear when it ends.
