@@ -49,7 +49,7 @@ class OpenAIChooser:
             raise ValueError("Model request limit reached")
         self.requests_used += 1  # Failed requests also consume the attempt budget.
         response = self.client.responses.create(
-            model=self.model, reasoning={"effort": "low"}, store=False,
+            model=self.model, reasoning={"effort": "low"}, max_output_tokens=1000, store=False,
             instructions=INSTRUCTIONS,
             input=json.dumps({"goal": asdict(goal), "tickets": [asdict(t) for t in tickets],
                               "progress": asdict(progress), "history": [asdict(s) for s in history]}),

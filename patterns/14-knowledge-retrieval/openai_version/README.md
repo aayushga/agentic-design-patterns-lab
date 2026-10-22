@@ -82,3 +82,8 @@ No live model quality, latency, or account access was measured. No real account
 lookup, refund, message, or other external action is performed.
 
 Reference: [OpenAI Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs).
+
+Request safeguards: output is capped at 2500 tokens per attempt, response
+storage is disabled (`store=False`), SDK retries are disabled, and clients close on
+success or failure. SDK timeouts and cooperative application deadlines are not a
+hard whole-run deadline. Token/request caps do not cap input charges or dollar spend.

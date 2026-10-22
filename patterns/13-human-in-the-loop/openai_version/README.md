@@ -71,3 +71,8 @@ provider, recipient address, actual customer record, or external write is presen
 Reviewer labels are not authentication; see the parent README's scope limits.
 
 Reference: [OpenAI Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs).
+
+Request safeguards: output is capped at 1500 tokens per attempt, response
+storage is disabled (`store=False`), SDK retries are disabled, and clients close on
+success or failure. SDK timeouts and cooperative application deadlines are not a
+hard whole-run deadline. Token/request caps do not cap input charges or dollar spend.

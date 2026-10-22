@@ -103,3 +103,8 @@ Tests use the real MCP protocol with fake OpenAI responses, requiring no install
 OpenAI SDK or API key. They incur no API charges. They validate local protocol
 execution and model/tool message exchange, not live model quality, latency, or
 account access.
+
+Request safeguards: output is capped at 2000 tokens per attempt, response
+storage is disabled (`store=False`), SDK retries are disabled, and clients close on
+success or failure. SDK timeouts and cooperative application deadlines are not a
+hard whole-run deadline. Token/request caps do not cap input charges or dollar spend.

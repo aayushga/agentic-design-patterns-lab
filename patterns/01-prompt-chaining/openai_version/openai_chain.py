@@ -38,14 +38,14 @@ def _get_client() -> OpenAI:
         )
     from openai import OpenAI
 
-    return OpenAI(api_key=api_key)
+    return OpenAI(api_key=api_key, timeout=30.0, max_retries=0)
 
 
 def _run_step(client: OpenAI, model: str | None, system_prompt: str, user_prompt: str) -> str:
     """Run one Responses API step and return plain text output."""
     response = client.responses.create(
         model=model or os.getenv("OPENAI_MODEL", "").strip() or DEFAULT_MODEL,
-        reasoning={"effort": "low"},
+        reasoning={"effort": "low"}, max_output_tokens=2000, store=False,
         input=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
@@ -54,7 +54,7 @@ def _run_step(client: OpenAI, model: str | None, system_prompt: str, user_prompt
     if getattr(response, "status", "completed") != "completed":
         raise RuntimeError("OpenAI did not complete the chain step. Please retry.")
     content = response.output_text
-    if not isinstance(content, str) or not content.strip():
+    if not isinstance(content, str) or not content.strip() or len(content) > 8000:
         raise RuntimeError("OpenAI returned no text for the chain step (possibly a refusal).")
     return content.strip()
 
@@ -87,8 +87,8 @@ def extract_key_themes(client: OpenAI, summary: str, model: str | None = None) -
 
     try:
         parsed = json.loads(raw)
-        if isinstance(parsed, list) and parsed and all(
-            isinstance(item, str) and item.strip() for item in parsed
+        if isinstance(parsed, list) and 1 <= len(parsed) <= 6 and all(
+            isinstance(item, str) and item.strip() and len(item) <= 100 for item in parsed
         ):
             return [item.strip() for item in parsed]
     except json.JSONDecodeError:
@@ -123,7 +123,7 @@ def generate_structured_response(
         parsed = json.loads(raw)
         if isinstance(parsed, dict):
             next_step = parsed.get("recommended_next_step")
-            if isinstance(next_step, str) and next_step.strip():
+            if isinstance(next_step, str) and next_step.strip() and len(next_step) <= 1000:
                 return {
                     "input_length": len(original_text),
                     "summary": summary,
@@ -144,13 +144,13 @@ def generate_structured_response(
 
 def run_prompt_chain(text: str, model: str | None = None) -> OpenAIChainResult:
     """Run the full OpenAI-backed prompt chaining workflow."""
-    if not text.strip():
-        raise ValueError("Please provide non-empty text.")
-    client = _get_client()
-    summary = summarize_text(client, text, model=model)
-    themes = extract_key_themes(client, summary, model=model)
-    final_response = generate_structured_response(client, text, summary, themes, model=model)
-    return OpenAIChainResult(summary=summary, themes=themes, final_response=final_response)
+    if not isinstance(text, str) or not text.strip() or len(text) > 20000:
+        raise ValueError("Please provide non-empty text of at most 20000 characters.")
+    with _get_client() as client:
+        summary = summarize_text(client, text, model=model)
+        themes = extract_key_themes(client, summary, model=model)
+        final_response = generate_structured_response(client, text, summary, themes, model=model)
+        return OpenAIChainResult(summary=summary, themes=themes, final_response=final_response)
 
 
 def main() -> None:

@@ -56,7 +56,7 @@ def run_openai_reflection(
             options = {"text": {"format": CRITIQUE_FORMAT}} if critique else {}
             response = client.responses.create(
                 model=selected_model,
-                reasoning={"effort": "low"},
+                reasoning={"effort": "low"}, max_output_tokens=2000, store=False,
                 instructions=instructions,
                 input=json.dumps(payload),
                 **options,

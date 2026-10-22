@@ -100,8 +100,8 @@ def local_writer(query: str, handoffs: list[Handoff]) -> str:
 
 
 def validate_query(query: str) -> None:
-    if not isinstance(query, str) or not query.strip():
-        raise ValueError("Please provide a non-empty support query")
+    if not isinstance(query, str) or not query.strip() or len(query) > 1000:
+        raise ValueError("Please provide a non-empty support query of at most 1000 characters")
 
 
 def _validate_assignment(assignment: Assignment) -> None:

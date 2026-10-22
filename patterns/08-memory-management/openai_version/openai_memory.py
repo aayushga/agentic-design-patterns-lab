@@ -50,7 +50,7 @@ class OpenAIResponder:
             self.requests_used += 1
             # Fresh request from bounded text data, not a response/reasoning continuation.
             response = client.responses.create(
-                model=selected_model, reasoning={"effort": "low"},
+                model=selected_model, reasoning={"effort": "low"}, max_output_tokens=2000,
                 instructions=INSTRUCTIONS, store=False,
                 input=json.dumps({"query": query, "memory_context": context}),
             )

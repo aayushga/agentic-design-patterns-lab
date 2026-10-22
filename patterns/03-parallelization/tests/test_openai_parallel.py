@@ -114,3 +114,11 @@ def test_all_failed_requests_do_not_produce_fabricated_analysis(fake_async_opena
     result = asyncio.run(parallel.run_openai_parallel("ticket"))
     assert all(task.status == "error" and task.output is None for task in result.task_results)
     assert result.combined_response.count("unavailable") == 3
+
+
+@pytest.mark.parametrize("timeout",[0,-1,True,"30",float("nan"),float("inf"),301])
+def test_invalid_timeout_is_rejected_before_client_creation(fake_async_openai,timeout):
+    requests,state = fake_async_openai()
+    with pytest.raises(ValueError,match="task_timeout"):
+        asyncio.run(parallel.run_openai_parallel("ticket",task_timeout=timeout))
+    assert not requests and state["client_options"] is None

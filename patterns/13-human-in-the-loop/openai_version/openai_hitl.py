@@ -45,7 +45,7 @@ def draft_for_review(query: str, queue: ReviewQueue, *, model: str | None = None
 
     with OpenAI(api_key=key, timeout=30.0, max_retries=0) as client:
         response = client.responses.create(
-            model=selected_model, reasoning={"effort": "low"}, store=False,
+            model=selected_model, reasoning={"effort": "low"}, max_output_tokens=1500, store=False,
             instructions=INSTRUCTIONS, input=json.dumps({"query": query}),
             text={"format": DRAFT_FORMAT},
         )

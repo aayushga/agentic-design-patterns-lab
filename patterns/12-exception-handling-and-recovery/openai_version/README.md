@@ -96,3 +96,8 @@ All ticket data is fictional and no account changes or outgoing messages occur.
 
 References: [official Python SDK error handling and retries](https://developers.openai.com/api/reference/python),
 [rate-limit recovery](https://developers.openai.com/api/docs/guides/rate-limits).
+
+Request safeguards: output is capped at 1000 tokens per attempt, response
+storage is disabled (`store=False`), SDK retries are disabled, and clients close on
+success or failure. SDK timeouts and cooperative application deadlines are not a
+hard whole-run deadline. Token/request caps do not cap input charges or dollar spend.

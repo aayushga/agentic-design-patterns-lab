@@ -65,3 +65,9 @@ python -m pytest
 
 Tests mock the SDK, verify model selection and output handling, and block network
 connections. They run without the SDK or a real API key.
+
+Request safeguards: output is capped at 2000 tokens per attempt, response
+storage is disabled (`store=False`), SDK retries are disabled, and clients close on
+success or failure. SDK timeouts and cooperative application deadlines are not a
+hard whole-run deadline. Token/request caps do not cap input charges or dollar spend.
+Input text is limited to 20000 raw characters before a model request.

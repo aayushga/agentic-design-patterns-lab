@@ -138,3 +138,12 @@ def test_model_override_precedence(reflection_sdk, monkeypatch, explicit, expect
     monkeypatch.setenv("OPENAI_MODEL", "gpt-6.1-sol")
     router.run_openai_reflection("ticket", model=explicit)
     assert all(request["model"] == expected for request in requests)
+
+
+def test_oversized_query_is_rejected_before_client_creation(fake_openai):
+    from importlib import import_module
+    adapter = import_module("patterns.04-reflection.openai_version.openai_reflection")
+    client, requests = fake_openai()
+    with pytest.raises(ValueError,match="1000"):
+        adapter.run_openai_reflection("x"*1001)
+    assert not requests and client.options is None

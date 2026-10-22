@@ -98,3 +98,9 @@ python -m pytest patterns/06-planning/tests -q
 Tests substitute a fake SDK and block network connections. They incur no API
 charges and require neither a key nor the real SDK. They validate orchestration
 and request construction, not live model quality, account access, or latency.
+
+Request safeguards: output is capped at 2500 tokens per attempt, response
+storage is disabled (`store=False`), SDK retries are disabled, and clients close on
+success or failure. SDK timeouts and cooperative application deadlines are not a
+hard whole-run deadline. Token/request caps do not cap input charges or dollar spend.
+Input text is limited to 1000 raw characters before a model request.

@@ -62,7 +62,7 @@ def run_openai_rag(query: str, knowledge_base: KnowledgeBase | None = None, *,
 
     with OpenAI(api_key=key, timeout=30.0, max_retries=0) as client:
         response = client.responses.create(
-            model=selected_model, reasoning={"effort": "low"}, store=False,
+            model=selected_model, reasoning={"effort": "low"}, max_output_tokens=2500, store=False,
             instructions=INSTRUCTIONS,
             input=json.dumps({"question": query, "evidence": evidence_payload(hits)}, ensure_ascii=False),
             text={"format": ANSWER_FORMAT},

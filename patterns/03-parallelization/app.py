@@ -100,6 +100,14 @@ def combine_results(results: list[TaskResult]) -> str:
     return "\n".join(lines)
 
 
+def validate_inputs(text: str, task_timeout: float) -> None:
+    if not isinstance(text, str) or not text.strip() or len(text) > 1000:
+        raise ValueError("Please provide a non-empty query of at most 1000 characters")
+    if (type(task_timeout) not in (int, float) or not math.isfinite(task_timeout)
+            or not 0 < task_timeout <= 300):
+        raise ValueError("task_timeout must be a positive, finite number of at most 300 seconds")
+
+
 async def run_parallel_analysis(
     text: str,
     *,
@@ -112,13 +120,15 @@ async def run_parallel_analysis(
     `sequential=True` provides a comparison using the same tasks and input.
     Per-task failures do not discard other results. Cancellation propagates.
     """
-    if not text.strip():
-        raise ValueError("Please provide a non-empty query")
-    if not math.isfinite(task_timeout) or task_timeout <= 0:
-        raise ValueError("task_timeout must be a positive, finite number")
+    validate_inputs(text, task_timeout)
     tasks = dict(default_analyzers() if analyzers is None else analyzers)
     if not tasks:
         raise ValueError("Please provide at least one analyzer")
+    if (len(tasks) > 10 or any(not isinstance(name, str) or not 1 <= len(name) <= 40
+                              or not callable(analyzer) for name, analyzer in tasks.items())):
+        raise ValueError("Provide at most ten named callable analyzers (names: 1 to 40 characters)")
+    if type(sequential) is not bool:
+        raise ValueError("sequential must be a boolean")
 
     started = perf_counter()
     if sequential:

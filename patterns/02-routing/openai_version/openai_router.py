@@ -75,8 +75,8 @@ def classify_intent_with_openai(user_input: str, model: str | None = None) -> Di
     Returns a dict with `route`, `confidence`, and `reason`.
     Raises ValueError if OPENAI_API_KEY is missing.
     """
-    if not user_input.strip():
-        raise ValueError("Please provide a non-empty request.")
+    if not isinstance(user_input, str) or not user_input.strip() or len(user_input) > 1000:
+        raise ValueError("Please provide a non-empty request of at most 1000 characters.")
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key:
         raise ValueError(
@@ -87,7 +87,6 @@ def classify_intent_with_openai(user_input: str, model: str | None = None) -> Di
     # the OpenAI package is not installed and the OpenAI path is not used.
     from openai import OpenAI
 
-    client = OpenAI(api_key=api_key)
 
     system_prompt = (
         "You are an intent router. Classify the user query into exactly one route: "
@@ -95,29 +94,30 @@ def classify_intent_with_openai(user_input: str, model: str | None = None) -> Di
         "route, confidence, reason. Confidence must be one of: high, medium, low."
     )
 
-    response = client.responses.create(
-        model=model or os.getenv("OPENAI_MODEL", "").strip() or DEFAULT_MODEL,
-        reasoning={"effort": "low"},
-        input=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_input},
-        ],
-        text={"format": {
-            "type": "json_schema",
-            "name": "intent_classification",
-            "strict": True,
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "route": {"type": "string", "enum": sorted(ALLOWED_ROUTES)},
-                    "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
-                    "reason": {"type": "string"},
+    with OpenAI(api_key=api_key, timeout=30.0, max_retries=0) as client:
+        response = client.responses.create(
+            model=model or os.getenv("OPENAI_MODEL", "").strip() or DEFAULT_MODEL,
+            reasoning={"effort": "low"}, max_output_tokens=1000, store=False,
+            input=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_input},
+            ],
+            text={"format": {
+                "type": "json_schema",
+                "name": "intent_classification",
+                "strict": True,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "route": {"type": "string", "enum": sorted(ALLOWED_ROUTES)},
+                        "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
+                        "reason": {"type": "string"},
+                    },
+                    "required": ["route", "confidence", "reason"],
+                    "additionalProperties": False,
                 },
-                "required": ["route", "confidence", "reason"],
-                "additionalProperties": False,
-            },
-        }},
-    )
+            }},
+        )
 
     fallback = {
         "route": "unknown",
@@ -126,11 +126,13 @@ def classify_intent_with_openai(user_input: str, model: str | None = None) -> Di
     }
     if getattr(response, "status", "completed") != "completed":
         return fallback
+    if not isinstance(response.output_text, str) or len(response.output_text) > 4000:
+        return fallback
     try:
         parsed = json.loads(response.output_text)
     except (json.JSONDecodeError, TypeError):
         return fallback
-    if not isinstance(parsed, dict):
+    if not isinstance(parsed, dict) or set(parsed) != {"route", "confidence", "reason"}:
         return fallback
 
     route = parsed.get("route")
@@ -146,7 +148,7 @@ def classify_intent_with_openai(user_input: str, model: str | None = None) -> Di
             "confidence": "low",
             "reason": "Model returned an invalid route; falling back to 'unknown'.",
         }
-    if not reason:
+    if not reason or len(reason) > 500:
         return fallback
     if confidence not in {"high", "medium", "low"} or route == "unknown":
         confidence = "low"
@@ -175,7 +177,7 @@ def main() -> None:
     """Small CLI demo for the OpenAI-backed router."""
     query = input("Enter a request to route: ").strip()
     if not query:
-        print("Please provide a non-empty request.")
+        print("Please provide a non-empty request of at most 1000 characters.")
         return
 
     try:

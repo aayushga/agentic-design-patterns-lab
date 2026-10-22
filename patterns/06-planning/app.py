@@ -97,8 +97,8 @@ def local_planner(request: PlanningRequest, excluded_venues: set[str],
 
 
 def validate_request(goal: str, attendees: int, budget: int, max_replans: int) -> None:
-    if not isinstance(goal, str) or not goal.strip():
-        raise ValueError("Please provide a non-empty goal")
+    if not isinstance(goal, str) or not goal.strip() or len(goal) > 1000:
+        raise ValueError("Please provide a non-empty goal of at most 1000 characters")
     if type(attendees) is not int or not 1 <= attendees <= 100:
         raise ValueError("attendees must be an integer between 1 and 100")
     if type(budget) is not int or not 1 <= budget <= 100000:
