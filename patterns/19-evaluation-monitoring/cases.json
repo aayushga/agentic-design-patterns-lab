@@ -1,0 +1,42 @@
+[
+  {
+    "case_id": "case01",
+    "query": "Please explain a charge on my invoice.",
+    "expected_route": "billing"
+  },
+  {
+    "case_id": "case02",
+    "query": "I was charged twice for the same order.",
+    "expected_route": "billing"
+  },
+  {
+    "case_id": "case03",
+    "query": "I cannot log in after resetting my password.",
+    "expected_route": "support"
+  },
+  {
+    "case_id": "case04",
+    "query": "The app crashes whenever I open a report.",
+    "expected_route": "support"
+  },
+  {
+    "case_id": "case05",
+    "query": "What is the price of the team plan?",
+    "expected_route": "sales"
+  },
+  {
+    "case_id": "case06",
+    "query": "Can we arrange an enterprise product demo?",
+    "expected_route": "sales"
+  },
+  {
+    "case_id": "case07",
+    "query": "Will it rain tomorrow?",
+    "expected_route": "unknown"
+  },
+  {
+    "case_id": "case08",
+    "query": "My plan was billed twice; can you investigate?",
+    "expected_route": "billing"
+  }
+]
