@@ -40,7 +40,7 @@ Each pattern includes:
 - [x] 17. Reasoning Techniques
 - [x] 18. Guardrails/Safety Patterns
 - [x] 19. Evaluation and Monitoring
-- [ ] 20. Prioritization
+- [x] 20. Prioritization
 - [ ] 21. Exploration and Discovery
 
 The roadmap follows Antonio Gulli's *Agentic Design Patterns: A Hands-On Guide to
@@ -99,18 +99,21 @@ can be explored within the relevant chapters instead of replacing the book's seq
 - [Pattern 19: Evaluation and Monitoring](patterns/19-evaluation-monitoring/):
   labeled cases, exact-match grading, honest coverage/usage, quality gates, and rolling alerts.
 
+- [Pattern 20: Prioritization](patterns/20-prioritization/):
+  feasible task ranking, explicit scores, dependencies, work budgets, and dynamic reprioritization.
+
 Each includes a default local implementation, basic and advanced examples, an
-optional OpenAI implementation, and offline tests. Pattern 20: Prioritization is next.
+optional OpenAI implementation, and offline tests. Pattern 21: Exploration and Discovery is next.
 
 ## Run and Test
 
 Use Python 3.11 or newer for the full lab (the MCP SDK v2 requirement).
-Patterns 01–09 and 11–19 also support Python 3.10. From the repository root:
+Patterns 01–09 and 11–20 also support Python 3.10. From the repository root:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install --only-binary=:all: -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt -r patterns/04-reflection/requirements.txt -r patterns/05-tool-use/requirements.txt -r patterns/06-planning/requirements.txt -r patterns/07-multi-agent-collaboration/requirements.txt -r patterns/08-memory-management/requirements.txt -r patterns/09-learning-and-adaptation/requirements.txt -r patterns/10-model-context-protocol/requirements.txt -r patterns/11-goal-setting-and-monitoring/requirements.txt -r patterns/12-exception-handling-and-recovery/requirements.txt -r patterns/13-human-in-the-loop/requirements.txt -r patterns/14-knowledge-retrieval/requirements.txt -r patterns/15-inter-agent-communication/requirements.txt -r patterns/16-resource-aware-optimization/requirements.txt -r patterns/17-reasoning-techniques/requirements.txt -r patterns/18-guardrails-safety/requirements.txt -r patterns/19-evaluation-monitoring/requirements.txt
+python -m pip install --only-binary=:all: -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt -r patterns/04-reflection/requirements.txt -r patterns/05-tool-use/requirements.txt -r patterns/06-planning/requirements.txt -r patterns/07-multi-agent-collaboration/requirements.txt -r patterns/08-memory-management/requirements.txt -r patterns/09-learning-and-adaptation/requirements.txt -r patterns/10-model-context-protocol/requirements.txt -r patterns/11-goal-setting-and-monitoring/requirements.txt -r patterns/12-exception-handling-and-recovery/requirements.txt -r patterns/13-human-in-the-loop/requirements.txt -r patterns/14-knowledge-retrieval/requirements.txt -r patterns/15-inter-agent-communication/requirements.txt -r patterns/16-resource-aware-optimization/requirements.txt -r patterns/17-reasoning-techniques/requirements.txt -r patterns/18-guardrails-safety/requirements.txt -r patterns/19-evaluation-monitoring/requirements.txt -r patterns/20-prioritization/requirements.txt
 python -m pytest
 python patterns/01-prompt-chaining/app.py
 python patterns/02-routing/app.py
@@ -131,9 +134,10 @@ python patterns/16-resource-aware-optimization/app.py
 python patterns/17-reasoning-techniques/app.py
 python patterns/18-guardrails-safety/app.py
 python patterns/19-evaluation-monitoring/app.py
+python patterns/20-prioritization/app.py
 ```
 
-Patterns 01–09, 11–14, and 16–19 use only the Python standard library for local examples.
+Patterns 01–09, 11–14, and 16–20 use only the Python standard library for local examples.
 Pattern 10 uses the free official MCP SDK and local stdio subprocesses. Pattern 15
 uses the free official A2A SDK and in-memory HTTP transport. The test suite uses
 pytest, fake API responses, and blocks network connections; no API key is needed.
@@ -144,7 +148,7 @@ You can also run `python -m pytest` from any pattern folder.
 [Python tests](https://github.com/aayushga/agentic-design-patterns-lab/actions/workflows/tests.yml)
 runs automatically on pushes and pull requests, using GitHub-hosted Ubuntu runners
 with Python 3.10, 3.11, 3.12, and 3.14. It runs the combined suite, each pattern's
-suite independently, and local examples. Python 3.10 covers Patterns 01–09 and 11–19; the
+suite independently, and local examples. Python 3.10 covers Patterns 01–09 and 11–20; the
 newer versions also run the real MCP protocol tests and demos. No OpenAI API key
 or SDK is required, and the tests make no live API calls.
 
@@ -174,14 +178,15 @@ No local editor is required for review.
 - [Reasoning Techniques setup](patterns/17-reasoning-techniques/openai_version/README.md)
 - [Guardrails/Safety setup](patterns/18-guardrails-safety/openai_version/README.md)
 - [Evaluation and Monitoring setup](patterns/19-evaluation-monitoring/openai_version/README.md)
+- [Prioritization setup](patterns/20-prioritization/openai_version/README.md)
 
 All use the official OpenAI Python SDK and the Responses API. The default model
-is `gpt-6-astra` with low reasoning effort for Patterns 01–15 and 18–19. Pattern 16 uses low
+is `gpt-6-astra` with low reasoning effort for Patterns 01–15 and 18–20. Pattern 16 uses low
 for economy and medium for thorough, with an optional separate economy model.
 Pattern 17 uses medium effort to propose arithmetic expressions for local checking.
 Set `OPENAI_MODEL` to override the model,
 or pass `model=` when calling the Python functions (which takes precedence).
-Overrides must support Responses and the configured reasoning effort; Routing, Reflection, Planning, Multi-Agent Collaboration, Learning and Adaptation, Goal Setting and Monitoring, Exception Handling and Recovery, Human-in-the-Loop, Knowledge Retrieval, Inter-Agent Communication, Reasoning Techniques, Guardrails/Safety, and Evaluation and Monitoring
+Overrides must support Responses and the configured reasoning effort; Routing, Reflection, Planning, Multi-Agent Collaboration, Learning and Adaptation, Goal Setting and Monitoring, Exception Handling and Recovery, Human-in-the-Loop, Knowledge Retrieval, Inter-Agent Communication, Reasoning Techniques, Guardrails/Safety, Evaluation and Monitoring, and Prioritization
 also require structured outputs; Tool Use and MCP require function calling. API usage is billed separately and requires access to the chosen model.
 The examples make three API requests for a chain, one for a routing decision, and
 up to three concurrent requests for parallel analysis. The parallel result is merged locally. Reflection makes up to six sequential
@@ -228,6 +233,10 @@ Monitoring defaults to three sequential routing requests, leaving explicit incom
 coverage on its eight-case dataset; `--max-cases 8` allows a full run. Reference
 labels stay in the host grader, SDK retries are disabled, and provider errors stop
 further calls. Gates and rolling alerts run locally; known token totals are not dollar caps.
+Prioritization makes at most one request to rank the host-eligible task set. Python
+validates the exact ID permutation, preserves hard constraints, and uses an explicit
+rule fallback on model failure. No eligible work or a zero model budget means no
+request; fictional work-minute budgets do not cap model charges.
 
 The SDK is installed separately using each `openai_version/requirements.txt`,
 so local-only users do not need it. Scripts read exported environment variables;
