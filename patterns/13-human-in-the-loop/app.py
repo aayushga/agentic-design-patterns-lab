@@ -62,11 +62,30 @@ class ReviewQueue:
             raise ValueError("max_reviews must be an integer between 1 and 100")
         if type(max_revisions) is not int or not 1 <= max_revisions <= 10:
             raise ValueError("max_revisions must be an integer between 1 and 10")
+        if not callable(clock):
+            raise ValueError("clock must be callable")
         self._clock = clock
+        self._last_clock = None
+        self._clock_failed = False
         self._max_reviews = max_reviews
         self._max_revisions = max_revisions
         self._reviews: dict[str, Review] = {}
         self._outbox: list[SimulatedDelivery] = []
+
+    def _now(self) -> float:
+        if self._clock_failed:
+            raise ValueError("Clock is invalid; create a new controller")
+        try:
+            value = self._clock()
+            valid = (type(value) in (int, float) and math.isfinite(value)
+                     and (self._last_clock is None or value >= self._last_clock))
+        except Exception:
+            valid = False
+        if not valid:
+            self._clock_failed = True
+            raise ValueError("Clock must return finite, nondecreasing numbers") from None
+        self._last_clock = value
+        return value
 
     @property
     def outbox(self) -> tuple[SimulatedDelivery, ...]:
@@ -77,13 +96,14 @@ class ReviewQueue:
         validate_ttl(ttl_seconds)
         if len(self._reviews) >= self._max_reviews:
             raise ValueError("Review queue capacity reached")
+        self._now()  # Fail before optional draft generation on an invalid clock.
 
     def submit(self, query: str, draft: str, *, ttl_seconds: float = 300) -> Review:
         self.check_submission(query, ttl_seconds)
         validate_text(draft, "draft", 1200)
         review_id = "REV-" + uuid4().hex
         review = Review(review_id, query, draft, 1, "pending", None, None,
-                        self._clock() + ttl_seconds,
+                        self._now() + ttl_seconds,
                         (AuditEvent("submitted", 1, "assistant", "Human review required."),))
         self._reviews[review_id] = review
         return review
@@ -93,7 +113,7 @@ class ReviewQueue:
         if review_id not in self._reviews:
             raise ValueError("Unknown review ID")
         review = self._reviews[review_id]
-        if review.state in ("pending", "approved") and self._clock() >= review.expires_at:
+        if review.state in ("pending", "approved") and self._now() >= review.expires_at:
             review = replace(review, state="expired", approved_revision=None, reviewer=None,
                              history=review.history + (AuditEvent("expired", review.revision, "system", "Review deadline reached."),))
             self._reviews[review_id] = review

@@ -135,3 +135,31 @@ def test_decider_exception_propagates():
         raise RuntimeError("unavailable")
     with pytest.raises(RuntimeError, match="unavailable"):
         app.run_tool_use("ticket", decider=broken)
+
+
+def test_decider_cannot_erase_history_to_bypass_execution_budget(monkeypatch):
+    executions = []
+    monkeypatch.setitem(app.TOOLS, "lookup_order", lambda **args: executions.append(args) or {"status":"shipped"})
+    calls = []
+    def decide(query, history):
+        calls.append(len(history))
+        history.clear()
+        if len(calls) == 4:  # Bound the regression itself on the old implementation.
+            return app.Decision(final_response="done")
+        return app.Decision(tool_call=app.ToolCall(str(len(calls)), "lookup_order", {"order_id":"ORD-1001"}))
+    result = app.run_tool_use("ticket", decider=decide, max_tool_calls=1)
+    assert len(executions) == 1 and calls == [0,1]
+    assert result.stop_reason == "tool_limit" and len(result.tool_history) == 1
+
+
+def test_decider_cannot_rewrite_observed_results_or_retained_arguments():
+    arguments = {"order_id":"ORD-1001"}
+    def decide(query, history):
+        if not history:
+            return app.Decision(tool_call=app.ToolCall("one", "lookup_order", arguments))
+        history[0].output["status"] = "fabricated"
+        arguments["order_id"] = "ORD-9999"
+        return app.Decision(final_response="review required")
+    result = app.run_tool_use("ticket", decider=decide)
+    assert result.tool_history[0].output["status"] == "shipped"
+    assert result.tool_history[0].arguments == {"order_id":"ORD-1001"}

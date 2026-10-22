@@ -20,7 +20,7 @@ CATERING = {
 }
 
 
-@dataclass
+@dataclass(frozen=True)
 class PlanningRequest:
     goal: str
     attendees: int

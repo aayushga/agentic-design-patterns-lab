@@ -137,3 +137,7 @@ reservations, fallback classification, cache boundaries/eviction, output bounds,
 late-result handling, request options, and cleanup without live API calls.
 
 Next: **Pattern 17 — Reasoning Techniques**.
+
+Injected clocks must return finite, nondecreasing numeric readings. Invalid readings
+raise an error before a further action/dispatch or late answer is released. Stateful
+controllers reject subsequent work after a clock fault; create a new controller.

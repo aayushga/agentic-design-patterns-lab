@@ -141,3 +141,16 @@ def test_unfixable_length_remains_unapproved():
     result = app.run_reflection(" ".join(["problem"] * 85), max_revisions=3)
     assert not result.approved and result.stop_reason == "no_progress"
     assert any(issue.startswith("length:") for issue in result.history[-1].critique.issues)
+
+
+def test_reviser_cannot_turn_a_rejection_into_approval_or_rewrite_trace():
+    original = app.Critique(False, ["needs work"])
+    def revise(query, draft, critique):
+        critique.approved = True
+        critique.issues.clear()
+        original.approved = True
+        original.issues.clear()
+        return draft
+    result = app.run_reflection("ticket", initial_draft="draft", reviewer=lambda *_: original, reviser=revise)
+    assert result.stop_reason == "no_progress" and not result.approved
+    assert result.history[0].critique == app.Critique(False, ["needs work"])

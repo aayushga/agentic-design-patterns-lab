@@ -220,7 +220,31 @@ def evaluate(cases, router: Router = baseline_router, *, variant: str = "baselin
                   tuple(observations), summarize(observations))
 
 
+def _valid_gate_metrics(metrics: dict) -> bool:
+    # Logs/caller-supplied metrics must not pass gates through NaN comparisons.
+    try:
+        n = metrics["attempted_count"]
+        if type(n) is not int or not 0 <= n <= 50:
+            return False
+        coverage = metrics["coverage"]
+        if type(coverage) not in (int, float) or not math.isfinite(coverage) or not 0 <= coverage <= 1:
+            return False
+        for name in ("accuracy", "error_rate", "p95_latency_ms"):
+            value = metrics[name]
+            if not n:
+                if value is not None:
+                    return False
+            elif (type(value) not in (int, float) or not math.isfinite(value) or value < 0
+                  or (name != "p95_latency_ms" and value > 1)):
+                return False
+        return True
+    except (KeyError, TypeError, OverflowError):
+        return False
+
+
 def gate_metrics(metrics: dict, thresholds: Thresholds = Thresholds()) -> Gate:
+    if not _valid_gate_metrics(metrics):
+        return Gate(False, ("invalid_metrics",))
     reasons = []
     if metrics["attempted_count"] < thresholds.min_samples:
         reasons.append("insufficient_samples")
@@ -243,6 +267,8 @@ def compare_reports(baseline: Report, candidate: Report, *, max_accuracy_drop: f
     if type(max_accuracy_drop) not in (int, float) or not 0 <= max_accuracy_drop <= 1:
         raise ValueError("max_accuracy_drop must be from 0 to 1")
     reasons = []
+    if not _valid_gate_metrics(baseline.metrics) or not _valid_gate_metrics(candidate.metrics):
+        return {"comparable": False, "accuracy_delta": None, "p95_latency_delta_ms": None, "reasons": ["invalid_metrics"]}
     if baseline.dataset_fingerprint != candidate.dataset_fingerprint:
         reasons.append("different_datasets")
     if baseline.metrics["coverage"] != 1 or candidate.metrics["coverage"] != 1:
@@ -253,7 +279,9 @@ def compare_reports(baseline: Report, candidate: Report, *, max_accuracy_drop: f
     return {"comparable": True, "accuracy_delta": delta,
             "p95_latency_delta_ms": candidate.metrics["p95_latency_ms"] - baseline.metrics["p95_latency_ms"]
                 if baseline.timing_source == candidate.timing_source else None,
-            "reasons": ["accuracy_regression"] if delta < -max_accuracy_drop else []}
+            # With at most 50 cases, 1e-12 only absorbs floating-point boundary noise.
+            "reasons": ["accuracy_regression"] if delta < -max_accuracy_drop
+                and not math.isclose(delta, -max_accuracy_drop, rel_tol=0, abs_tol=1e-12) else []}
 
 
 class RollingMonitor:

@@ -125,3 +125,7 @@ The same tests run in GitHub Actions and independently from this pattern folder.
 References: Antonio Gulli, *Agentic Design Patterns*, Chapter 19; and OpenAI's
 [evaluation best practices](https://developers.openai.com/api/docs/guides/evaluation-best-practices).
 Next: **Pattern 20 — Prioritization**.
+
+Gates reject missing, non-finite, or inconsistent metric types with `invalid_metrics`.
+Accuracy-drop comparisons allow only floating-point rounding noise at the configured
+boundary; a drop exactly equal to the tolerance is not a regression.

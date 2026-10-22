@@ -205,3 +205,34 @@ def test_invalid_budget_is_rejected(kwargs):
 def test_invalid_work_item_is_rejected(query, detail):
     with pytest.raises(ValueError):
         app.WorkItem(query, detail)
+
+
+@pytest.mark.parametrize("bad", [float("nan"),float("inf"),float("-inf"),True,"invalid",10**400])
+def test_invalid_clock_does_not_start_a_controller(bad):
+    with pytest.raises(ValueError,match="Clock"):
+        app.ResourceAwareAgent(clock=lambda:bad)
+
+
+def test_clock_failure_after_backend_keeps_reservations_but_releases_no_answer():
+    now = [10]
+    def backend(*args):
+        now[0] = float("nan")
+        return "must not be released"
+    agent = app.ResourceAwareAgent(clock=lambda:now[0],backend=backend)
+    with pytest.raises(ValueError,match="Clock"):
+        agent.answer(BRIEF)
+    assert agent.calls == 1 and agent.reserved == 600 and not agent.cache
+    now[0] = 20
+    with pytest.raises(ValueError,match="Clock"):
+        agent.answer(BRIEF)
+    assert agent.calls == 1
+
+
+def test_clock_rollback_prevents_backend_call():
+    now = [10]
+    calls = []
+    agent = app.ResourceAwareAgent(clock=lambda:now[0],backend=lambda *args:calls.append(1) or "answer")
+    now[0] = 9
+    with pytest.raises(ValueError,match="Clock"):
+        agent.answer(BRIEF)
+    assert not calls

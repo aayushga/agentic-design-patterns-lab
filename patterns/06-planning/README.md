@@ -142,3 +142,7 @@ python -m pytest patterns/06-planning/tests -q
 Tests cover changing constraints, dependencies, failures, replanning, limits,
 invalid plans, SDK request construction, and client cleanup. They use fake SDK
 responses and block network connections, requiring no key or real SDK.
+
+Planning requests are immutable host facts. A planner cannot raise the input budget
+or change attendance before its plan is checked against those constraints.
+Callbacks are still trusted Python code; this is not a sandbox.

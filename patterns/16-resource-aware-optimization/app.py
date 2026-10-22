@@ -102,13 +102,30 @@ class ResourceAwareAgent:
             raise ValueError("Provide a Budget and callable backend/clock")
         if type(cache_size) is not int or not 0 <= cache_size <= 32:
             raise ValueError("cache_size must be an integer from 0 to 32")
-        self.budget, self.backend, self.clock = budget, backend, clock
+        self.budget, self.backend, self._clock = budget, backend, clock
+        self._last_clock = None
+        self._clock_failed = False
         self.cache_size = cache_size
-        self.started = clock()
+        self.started = self._now()
         self.deadline = self.started + budget.seconds
         self.calls = 0
         self.reserved = 0
         self.cache: OrderedDict[WorkItem, tuple[Profile, str]] = OrderedDict()
+
+    def _now(self) -> float:
+        if self._clock_failed:
+            raise ValueError("Clock is invalid; create a new controller")
+        try:
+            value = self._clock()
+            valid = (type(value) in (int, float) and math.isfinite(value)
+                     and (self._last_clock is None or value >= self._last_clock))
+        except Exception:
+            valid = False
+        if not valid:
+            self._clock_failed = True
+            raise ValueError("Clock must return finite, nondecreasing numbers") from None
+        self._last_clock = value
+        return value
 
     def answer(self, item: WorkItem, *, allow_degraded: bool = True) -> Result:
         if not isinstance(item, WorkItem) or type(allow_degraded) is not bool:
@@ -120,9 +137,9 @@ class ResourceAwareAgent:
             return Result(item.query, item.detail, status, profile.name if profile else None,
                           text, cached, self.calls - calls_before, self.reserved - tokens_before,
                           self.calls, self.reserved, self.budget.output_tokens - self.reserved,
-                          round(max(0.0, self.clock() - self.started), 3), tuple(trace))
+                          round(max(0.0, self._now() - self.started), 3), tuple(trace))
 
-        if self.clock() >= self.deadline:
+        if self._now() >= self.deadline:
             trace.append("session deadline reached")
             return finish("deadline_exceeded")
         if item in self.cache:
@@ -136,7 +153,7 @@ class ResourceAwareAgent:
             profiles.append(ECONOMY)
         attempted = False
         for profile in profiles:
-            remaining_seconds = self.deadline - self.clock()
+            remaining_seconds = self.deadline - self._now()
             if remaining_seconds <= 0:
                 trace.append("session deadline reached")
                 return finish("deadline_exceeded")
@@ -163,7 +180,7 @@ class ResourceAwareAgent:
             except Exception:
                 trace.append(f"{profile.name} failed or returned invalid output; reservation retained")
                 return finish("failed", profile)
-            if self.clock() >= self.deadline:
+            if self._now() >= self.deadline:
                 trace.append("response arrived after the deadline; not cached or returned")
                 return finish("deadline_exceeded", profile)
             degraded = profile.detail != item.detail
