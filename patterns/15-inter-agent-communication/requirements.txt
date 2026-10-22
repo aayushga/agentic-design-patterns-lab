@@ -1,2 +1,2 @@
-pytest>=8.0.0
+-r ../../requirements-test.txt
 a2a-sdk[http-server]>=1.2.2,<2

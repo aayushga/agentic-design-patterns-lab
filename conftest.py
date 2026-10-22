@@ -11,6 +11,7 @@ def offline_environment(monkeypatch):
     """Tests never use real credentials or open network connections."""
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.delenv("OPENAI_MODEL", raising=False)
+    monkeypatch.delenv("OPENAI_ECONOMY_MODEL", raising=False)
 
     def block_network(*args, **kwargs):
         raise AssertionError("Network access is forbidden in the offline test suite")

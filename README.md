@@ -2,6 +2,10 @@
 
 A hands-on, portfolio-ready lab for implementing **agentic AI design patterns** with clean, practical Python examples.
 
+This is a learning lab, not a deployable multi-user service. See the
+[security boundaries](SECURITY.md), [engineering review](docs/engineering-review.md),
+and [dependency/platform policy](docs/dependencies.md).
+
 This repository is focused on:
 - Learning core agentic patterns by building them from scratch
 - Keeping implementations beginner-friendly and easy to run locally
@@ -111,12 +115,16 @@ optional OpenAI implementation, and offline tests. All 21 patterns in the roadma
 ## Run and Test
 
 Use Python 3.11 or newer for the full lab (the MCP SDK v2 requirement).
+Read the [Intel macOS dependency note](docs/dependencies.md#intel-macos-limitation)
+before a full binary-only install on that platform; local standard-library patterns
+do not require the affected protocol dependency.
 Patterns 01–09 and 11–21 also support Python 3.10. From the repository root:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install --only-binary=:all: -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt -r patterns/04-reflection/requirements.txt -r patterns/05-tool-use/requirements.txt -r patterns/06-planning/requirements.txt -r patterns/07-multi-agent-collaboration/requirements.txt -r patterns/08-memory-management/requirements.txt -r patterns/09-learning-and-adaptation/requirements.txt -r patterns/10-model-context-protocol/requirements.txt -r patterns/11-goal-setting-and-monitoring/requirements.txt -r patterns/12-exception-handling-and-recovery/requirements.txt -r patterns/13-human-in-the-loop/requirements.txt -r patterns/14-knowledge-retrieval/requirements.txt -r patterns/15-inter-agent-communication/requirements.txt -r patterns/16-resource-aware-optimization/requirements.txt -r patterns/17-reasoning-techniques/requirements.txt -r patterns/18-guardrails-safety/requirements.txt -r patterns/19-evaluation-monitoring/requirements.txt -r patterns/20-prioritization/requirements.txt -r patterns/21-exploration-discovery/requirements.txt
+python -m pip install --upgrade 'pip>=26.2,<27'
+python -m pip install --only-binary=:all: -r requirements.txt
 python -m pytest
 python patterns/01-prompt-chaining/app.py
 python patterns/02-routing/app.py
@@ -155,6 +163,12 @@ with Python 3.10, 3.11, 3.12, and 3.14. It runs the combined suite, each pattern
 suite independently, and local examples. Python 3.10 covers Patterns 01–09 and 11–21; the
 newer versions also run the real MCP protocol tests and demos. No OpenAI API key
 or SDK is required, and the tests make no live API calls.
+
+The [Repository quality workflow](.github/workflows/quality.yml) adds static checks,
+application coverage, installation checks, and an installed-dependency audit.
+Standalone suites and local demos are discovered automatically; demo verification
+removes OpenAI variables and blocks socket connections. Dependency advisory checks
+use public metadata and require no model API key.
 
 Review changes in a pull request's **Files changed** tab and results in **Checks**.
 Full logs are available under **Actions → Python tests**. Once the workflow is on

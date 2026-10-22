@@ -1,0 +1,4 @@
+# Full local lab; the OpenAI SDK stays optional.
+-r requirements-test.txt
+-r patterns/10-model-context-protocol/requirements.txt
+-r patterns/15-inter-agent-communication/requirements.txt

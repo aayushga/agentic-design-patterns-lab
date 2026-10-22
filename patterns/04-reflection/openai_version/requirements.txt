@@ -1,1 +1,2 @@
+-r ../requirements.txt
 openai>=2.32.0

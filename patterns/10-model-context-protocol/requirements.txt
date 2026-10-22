@@ -1,2 +1,2 @@
-pytest>=8.0.0
+-r ../../requirements-test.txt
 mcp>=2.3.0,<3; python_version >= "3.11"

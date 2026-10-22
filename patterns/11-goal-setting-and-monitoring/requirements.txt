@@ -1,1 +1,1 @@
-pytest>=8.0.0
+-r ../../requirements-test.txt

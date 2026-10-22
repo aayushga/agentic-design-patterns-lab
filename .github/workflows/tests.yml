@@ -31,99 +31,20 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
-          cache-dependency-path: patterns/*/requirements.txt
-      - name: Install offline test dependencies
-        run: >-
-          python -m pip install --only-binary=:all: -r patterns/01-prompt-chaining/requirements.txt -r patterns/02-routing/requirements.txt -r patterns/03-parallelization/requirements.txt -r patterns/04-reflection/requirements.txt -r patterns/05-tool-use/requirements.txt -r patterns/06-planning/requirements.txt -r patterns/07-multi-agent-collaboration/requirements.txt -r patterns/08-memory-management/requirements.txt -r patterns/09-learning-and-adaptation/requirements.txt -r patterns/10-model-context-protocol/requirements.txt -r patterns/11-goal-setting-and-monitoring/requirements.txt -r patterns/12-exception-handling-and-recovery/requirements.txt -r patterns/13-human-in-the-loop/requirements.txt -r patterns/14-knowledge-retrieval/requirements.txt -r patterns/15-inter-agent-communication/requirements.txt -r patterns/16-resource-aware-optimization/requirements.txt -r patterns/17-reasoning-techniques/requirements.txt -r patterns/18-guardrails-safety/requirements.txt -r patterns/19-evaluation-monitoring/requirements.txt -r patterns/20-prioritization/requirements.txt -r patterns/21-exploration-discovery/requirements.txt
+          cache-dependency-path: |
+            requirements*.txt
+            constraints.txt
+            patterns/*/requirements.txt
+      - name: Upgrade installer and install local test dependencies
+        run: |
+          python -m pip install --upgrade 'pip>=26.2,<27'
+          python -m pip install --only-binary=:all: -r requirements.txt
       - name: Run complete test suite
         run: python -m pytest -q
       - name: Run each pattern independently
-        run: |
-          (cd patterns/01-prompt-chaining && python -m pytest -q)
-          (cd patterns/02-routing && python -m pytest -q)
-          (cd patterns/03-parallelization && python -m pytest -q)
-          (cd patterns/04-reflection && python -m pytest -q)
-          (cd patterns/05-tool-use && python -m pytest -q)
-          (cd patterns/06-planning && python -m pytest -q)
-          (cd patterns/07-multi-agent-collaboration && python -m pytest -q)
-          (cd patterns/08-memory-management && python -m pytest -q)
-          (cd patterns/09-learning-and-adaptation && python -m pytest -q)
-          (cd patterns/11-goal-setting-and-monitoring && python -m pytest -q)
-          (cd patterns/12-exception-handling-and-recovery && python -m pytest -q)
-          (cd patterns/13-human-in-the-loop && python -m pytest -q)
-          (cd patterns/14-knowledge-retrieval && python -m pytest -q)
-          (cd patterns/15-inter-agent-communication && python -m pytest -q)
-          (cd patterns/16-resource-aware-optimization && python -m pytest -q)
-          (cd patterns/17-reasoning-techniques && python -m pytest -q)
-          (cd patterns/18-guardrails-safety && python -m pytest -q)
-          (cd patterns/19-evaluation-monitoring && python -m pytest -q)
-          (cd patterns/20-prioritization && python -m pytest -q)
-          (cd patterns/21-exploration-discovery && python -m pytest -q)
-      - name: Run local examples
-        run: |
-          python patterns/01-prompt-chaining/app.py
-          python patterns/01-prompt-chaining/examples/basic_example.py
-          python patterns/01-prompt-chaining/examples/advanced_example.py
-          python patterns/02-routing/app.py
-          python patterns/02-routing/examples/basic_example.py
-          python patterns/02-routing/examples/advanced_example.py
-          python patterns/03-parallelization/app.py
-          python patterns/03-parallelization/examples/basic_example.py
-          python patterns/03-parallelization/examples/advanced_example.py
-          python patterns/04-reflection/app.py
-          python patterns/04-reflection/examples/basic_example.py
-          python patterns/04-reflection/examples/advanced_example.py
-          python patterns/05-tool-use/app.py
-          python patterns/05-tool-use/examples/basic_example.py
-          python patterns/05-tool-use/examples/advanced_example.py
-          python patterns/06-planning/app.py
-          python patterns/06-planning/examples/basic_example.py
-          python patterns/06-planning/examples/advanced_example.py
-          python patterns/07-multi-agent-collaboration/app.py
-          python patterns/07-multi-agent-collaboration/examples/basic_example.py
-          python patterns/07-multi-agent-collaboration/examples/advanced_example.py
-          python patterns/08-memory-management/app.py
-          python patterns/08-memory-management/examples/basic_example.py
-          python patterns/08-memory-management/examples/advanced_example.py
-          python patterns/09-learning-and-adaptation/app.py
-          python patterns/09-learning-and-adaptation/examples/basic_example.py
-          python patterns/09-learning-and-adaptation/examples/advanced_example.py
-          python patterns/11-goal-setting-and-monitoring/app.py
-          python patterns/11-goal-setting-and-monitoring/examples/basic_example.py
-          python patterns/11-goal-setting-and-monitoring/examples/advanced_example.py
-          python patterns/12-exception-handling-and-recovery/app.py
-          python patterns/12-exception-handling-and-recovery/examples/basic_example.py
-          python patterns/12-exception-handling-and-recovery/examples/advanced_example.py
-          python patterns/13-human-in-the-loop/app.py
-          python patterns/13-human-in-the-loop/examples/basic_example.py
-          python patterns/13-human-in-the-loop/examples/advanced_example.py
-          python patterns/14-knowledge-retrieval/app.py
-          python patterns/14-knowledge-retrieval/examples/basic_example.py
-          python patterns/14-knowledge-retrieval/examples/advanced_example.py
-          python patterns/15-inter-agent-communication/app.py
-          python patterns/15-inter-agent-communication/examples/basic_example.py
-          python patterns/15-inter-agent-communication/examples/advanced_example.py
-          python patterns/16-resource-aware-optimization/app.py
-          python patterns/16-resource-aware-optimization/examples/basic_example.py
-          python patterns/16-resource-aware-optimization/examples/advanced_example.py
-          python patterns/17-reasoning-techniques/app.py
-          python patterns/17-reasoning-techniques/examples/basic_example.py
-          python patterns/17-reasoning-techniques/examples/advanced_example.py
-          python patterns/18-guardrails-safety/app.py
-          python patterns/18-guardrails-safety/examples/basic_example.py
-          python patterns/18-guardrails-safety/examples/advanced_example.py
-          python patterns/19-evaluation-monitoring/app.py
-          python patterns/19-evaluation-monitoring/examples/basic_example.py
-          python patterns/19-evaluation-monitoring/examples/advanced_example.py
-          python patterns/20-prioritization/app.py
-          python patterns/20-prioritization/examples/basic_example.py
-          python patterns/20-prioritization/examples/advanced_example.py
-          python patterns/21-exploration-discovery/app.py
-          python patterns/21-exploration-discovery/examples/basic_example.py
-          python patterns/21-exploration-discovery/examples/advanced_example.py
-      - name: Run MCP suite independently (Python 3.11+)
-        if: matrix.python-version != '3.10'
-        run: python -m pytest patterns/10-model-context-protocol/tests -q
+        run: python scripts/run_pattern_tests.py
+      - name: Run credential-free local examples with sockets blocked
+        run: python scripts/run_local_examples.py
       - name: Run local MCP examples (Python 3.11+)
         if: matrix.python-version != '3.10'
         run: |

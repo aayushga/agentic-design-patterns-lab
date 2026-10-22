@@ -7,7 +7,7 @@ intent router for billing, support, sales, and fallback requests.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List
+from typing import Callable, Dict, List
 
 
 @dataclass
