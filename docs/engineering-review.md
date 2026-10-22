@@ -74,7 +74,8 @@ when copied/frozen inputs protect host invariants against accidental mutation.
   HTTP contracts; repeated successfully with SDK 2.54.0 and updated protocol dependencies.
 - Real-SDK mocks cover every adapter, sync/async clients, tool transcript correlation,
   client cleanup, retry suppression, pending human review, partial coverage, and host evidence.
-- No socket connection is permitted in tests. Example verification removes OpenAI
+- Test collection and execution both block socket connections and remove model credentials.
+  The guard is restored after the session for programmatic pytest users. Example verification removes OpenAI
   environment variables and blocks sockets in each launched local demo process.
   The fixed MCP subprocess is a read-only local protocol server, not a general sandbox.
 - Python 3.10/3.11/3.12/3.14 CI checks the supported pattern subsets independently.
@@ -82,6 +83,9 @@ when copied/frozen inputs protect host invariants against accidental mutation.
 - Quality CI measures application coverage with an 85% floor, runs static checks,
   validates installation, and audits the full installed resolution. Advisory metadata
   queries require network access; no model endpoint is involved.
+- PR #30: 1,406 offline tests, all 21 standalone suites, and 63 local demos passed.
+- Combined review tree: 1,484 tests passed, 87.9% application coverage, and 63 local
+  demos passed; the three PRs combine without merge conflicts.
 - Dependabot proposes weekly dependency/action updates. No automatic merge is configured.
 
 See [dependency policy](dependencies.md) for the patched floors and Intel macOS

@@ -1,5 +1,7 @@
 """Repository contracts: runnable folders, local documentation, and private-state hygiene."""
 from pathlib import Path
+import os
+import socket
 import re
 import subprocess
 from urllib.parse import unquote
@@ -8,6 +10,26 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 PATTERNS = sorted((ROOT/'patterns').glob('[0-9][0-9]-*'))
+
+
+def _collection_probe():
+    # If the guard regresses, this probes localhost only, never a model endpoint.
+    try:
+        with socket.socket() as connection:
+            connection.connect(("127.0.0.1", 9))
+    except AssertionError:
+        return True
+    except OSError:
+        return False
+    return False
+
+
+COLLECTION_BLOCKED = _collection_probe()
+COLLECTION_HAS_KEY = "OPENAI_API_KEY" in os.environ
+
+
+def test_collection_is_offline_before_fixtures_start():
+    assert COLLECTION_BLOCKED and not COLLECTION_HAS_KEY
 
 
 def test_complete_book_sequence_and_standalone_assets():
