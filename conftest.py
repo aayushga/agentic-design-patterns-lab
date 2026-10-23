@@ -6,11 +6,32 @@ import types
 import pytest
 
 
+_collection_guard = pytest.MonkeyPatch()
+
+
+def _block_network(*args, **kwargs):
+    raise AssertionError("Network access is forbidden in the offline test suite")
+
+
+def pytest_sessionstart(session):
+    """Protect module import/collection as well as individual test execution."""
+    for name in ("OPENAI_API_KEY", "OPENAI_MODEL", "OPENAI_ECONOMY_MODEL"):
+        _collection_guard.delenv(name, raising=False)
+    _collection_guard.setattr(socket.socket, "connect", _block_network)
+    _collection_guard.setattr(socket.socket, "connect_ex", _block_network)
+
+
+def pytest_sessionfinish(session, exitstatus):
+    # Also safe when pytest is invoked programmatically in a long-lived process.
+    _collection_guard.undo()
+
+
 @pytest.fixture(autouse=True)
 def offline_environment(monkeypatch):
     """Tests never use real credentials or open network connections."""
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.delenv("OPENAI_MODEL", raising=False)
+    monkeypatch.delenv("OPENAI_ECONOMY_MODEL", raising=False)
 
     def block_network(*args, **kwargs):
         raise AssertionError("Network access is forbidden in the offline test suite")

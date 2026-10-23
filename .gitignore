@@ -11,7 +11,20 @@ env/
 ENV/
 
 # Environment variables
-.env
+.env*
+!.env.example
 
 # macOS
 .DS_Store
+
+# Private local state and generated verification artifacts
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.db
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.ruff_cache/
+.idea/

@@ -1,0 +1,18 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    directories:
+      - /
+      - /patterns/*
+      - /patterns/*/openai_version
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      python-dependencies:
+        patterns: ['*']
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3

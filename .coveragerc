@@ -1,0 +1,10 @@
+[run]
+source = patterns
+omit =
+    */tests/*
+    */examples/*
+
+[report]
+show_missing = True
+precision = 1
+fail_under = 85

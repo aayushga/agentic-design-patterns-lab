@@ -1,0 +1,61 @@
+name: Repository quality
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 8 * * 1'
+permissions:
+  contents: read
+concurrency:
+  group: quality-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  quality:
+    name: Static checks and offline coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - name: Create isolated verification environment
+        run: |
+          python -m venv .venv
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+      - name: Install reviewed toolchain
+        run: |
+          python -m pip install --upgrade 'pip>=26.2,<27'
+          python -m pip install --only-binary=:all: -r requirements-dev.txt
+          python -m pip check
+      - run: python -m ruff check --select F,E9 patterns tests scripts conftest.py
+      - run: python -m bandit -r patterns -x '*/tests/*' -q
+      - name: Measure application coverage without tests or examples
+        run: |
+          python -m coverage run -m pytest -q
+          python -m coverage report
+  dependency-audit:
+    name: Installed dependency vulnerability audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - name: Create isolated verification environment
+        run: |
+          python -m venv .venv
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+      - name: Install full lab and optional SDK under security constraints
+        run: |
+          python -m pip install --upgrade 'pip>=26.2,<27'
+          python -m pip install --only-binary=:all: -r requirements-dev.txt -r patterns/01-prompt-chaining/openai_version/requirements.txt
+          python -m pip check
+      - name: Query public advisory metadata (no model API)
+        run: python -m pip_audit --strict --progress-spinner off
