@@ -88,3 +88,9 @@ Run `python -m pytest patterns/05-tool-use/tests -q` after installing the local
 pattern requirements. Tests substitute a fake SDK and block network connections;
 no live API calls, key, or API charges are required. They check the protocol and
 execution logic, not model quality, account access, prices, or real-world data.
+
+Request safeguards: output is capped at 1500 tokens per attempt, response
+storage is disabled (`store=False`), SDK retries are disabled, and clients close on
+success or failure. SDK timeouts and cooperative application deadlines are not a
+hard whole-run deadline. Token/request caps do not cap input charges or dollar spend.
+Input text is limited to 1000 raw characters before a model request.

@@ -65,3 +65,9 @@ not needed. Use the local examples to explore the pattern without API costs.
 
 References: [official Python SDK](https://github.com/openai/openai-python),
 [OpenAI model guidance](https://developers.openai.com/api/docs/guides/latest-model).
+
+Request safeguards: output is capped at 1000 tokens per attempt, response
+storage is disabled (`store=False`), SDK retries are disabled, and clients close on
+success or failure. SDK timeouts and cooperative application deadlines are not a
+hard whole-run deadline. Token/request caps do not cap input charges or dollar spend.
+Input text is limited to 1000 raw characters before a model request.

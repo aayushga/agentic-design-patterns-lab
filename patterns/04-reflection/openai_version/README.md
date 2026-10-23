@@ -80,3 +80,13 @@ print(asdict(result))
 This call makes live API requests. The repository's test suite uses fake SDK
 responses and blocks network connections, so tests need no key and incur no API
 charges.
+
+Request safeguards: output is capped at 2000 tokens per attempt, response
+storage is disabled (`store=False`), SDK retries are disabled, and clients close on
+success or failure. SDK timeouts and cooperative application deadlines are not a
+hard whole-run deadline. Token/request caps do not cap input charges or dollar spend.
+The ticket and an optional caller-supplied `initial_draft` are each limited to
+1000 raw characters, including surrounding whitespace. Oversized inputs raise
+`ValueError` before SDK client creation or any model request. Model-generated
+drafts and feedback are bounded by the per-request output-token cap; the
+1000-character limit applies to caller-supplied text.

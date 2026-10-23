@@ -106,3 +106,8 @@ See the local README for supported preference values, forgetting behavior, sessi
 reset, and storage limitations. Tests use temporary databases, fake SDK responses,
 and blocked network connections, with no real SDK, key, or API charges. They
 validate memory delivery and orchestration, not live model quality or account access.
+
+Request safeguards: output is capped at 2000 tokens per attempt, response
+storage is disabled (`store=False`), SDK retries are disabled, and clients close on
+success or failure. SDK timeouts and cooperative application deadlines are not a
+hard whole-run deadline. Token/request caps do not cap input charges or dollar spend.

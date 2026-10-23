@@ -53,8 +53,20 @@ def fake_openai(monkeypatch):
                 raise error
             return types.SimpleNamespace(output_text=next(remaining), status=status)
 
-        client = types.SimpleNamespace(responses=types.SimpleNamespace(create=create))
-        monkeypatch.setitem(sys.modules, "openai", types.SimpleNamespace(OpenAI=lambda **kwargs: client))
+        class Client:
+            def __init__(self):
+                self.responses = types.SimpleNamespace(create=create)
+                self.closed = False
+                self.options = None
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                self.closed = True
+        client = Client()
+        def factory(**kwargs):
+            client.options = kwargs
+            return client
+        monkeypatch.setitem(sys.modules, "openai", types.SimpleNamespace(OpenAI=factory))
         monkeypatch.setenv("OPENAI_API_KEY", "offline-test-placeholder")
         return client, requests
 

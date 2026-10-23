@@ -60,7 +60,7 @@ class OpenAIResponder:
         with OpenAI(api_key=api_key, timeout=30.0, max_retries=0) as client:
             self.requests_used += 1
             response = client.responses.create(
-                model=selected_model, reasoning={"effort": "low"}, store=False,
+                model=selected_model, reasoning={"effort": "low"}, max_output_tokens=1500, store=False,
                 instructions=INSTRUCTIONS,
                 input=json.dumps({"query": query, "context": context, "strategy": strategy}),
                 text={"format": REPLY_FORMAT},

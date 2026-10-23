@@ -95,7 +95,7 @@ def run_openai_collaboration(query: str, model: str | None = None) -> Collaborat
         def request(instructions, payload, format_=None):
             options = {"text": {"format": format_}} if format_ is not None else {}
             response = client.responses.create(
-                model=selected_model, reasoning={"effort": "low"},
+                model=selected_model, reasoning={"effort": "low"}, max_output_tokens=2000, store=False,
                 instructions=instructions, input=json.dumps(payload), **options,
             )
             if response.status != "completed":

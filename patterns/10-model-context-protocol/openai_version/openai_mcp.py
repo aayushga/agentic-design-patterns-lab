@@ -77,7 +77,7 @@ async def run_model_loop(query: str, client, api_client, *, model: str = DEFAULT
     history, seen_ids = [], set()
     while True:
         response = await api_client.responses.create(
-            model=model, reasoning={"effort": "low"},
+            model=model, reasoning={"effort": "low"}, max_output_tokens=2000, store=False,
             instructions=INSTRUCTIONS + f" Remaining tool calls: {max_tool_calls - len(history)}.",
             tools=definitions, parallel_tool_calls=False, input=list(transcript),
         )

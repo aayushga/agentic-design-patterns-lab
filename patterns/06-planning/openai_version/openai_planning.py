@@ -86,7 +86,7 @@ def run_openai_planning(goal: str, model: str | None = None, *, attendees: int =
     with OpenAI(api_key=api_key, timeout=30.0, max_retries=0) as client:
         def planner(request, excluded_venues, excluded_catering):
             response = client.responses.create(
-                model=selected_model, reasoning={"effort": "low"},
+                model=selected_model, reasoning={"effort": "low"}, max_output_tokens=2500, store=False,
                 instructions=INSTRUCTIONS,
                 input=json.dumps({"request": asdict(request), "venues": VENUES,
                                   "catering": CATERING,

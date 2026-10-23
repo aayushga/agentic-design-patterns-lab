@@ -129,8 +129,8 @@ Decider = Callable[[str, list[ToolObservation]], Decision]
 
 
 def validate_inputs(query: str, max_tool_calls: int) -> None:
-    if not isinstance(query, str) or not query.strip():
-        raise ValueError("Please provide a non-empty query")
+    if not isinstance(query, str) or not query.strip() or len(query) > 1000:
+        raise ValueError("Please provide a non-empty query of at most 1000 characters")
     if type(max_tool_calls) is not int or not 0 <= max_tool_calls <= 5:
         raise ValueError("max_tool_calls must be an integer between 0 and 5")
 

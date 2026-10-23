@@ -115,7 +115,7 @@ def run_openai_recovery(ticket_id: str = "T-101", *, scenario: str = "healthy",
         def select():
             try:
                 response = client.responses.create(
-                    model=selected_model, reasoning={"effort": "low"}, store=False,
+                    model=selected_model, reasoning={"effort": "low"}, max_output_tokens=1000, store=False,
                     instructions=INSTRUCTIONS,
                     input=json.dumps({"record": asdict(record), "lookup_status": lookup.status,
                                       "source": "simulated demo data"}),

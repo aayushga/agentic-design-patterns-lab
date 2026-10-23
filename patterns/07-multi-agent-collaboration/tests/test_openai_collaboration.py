@@ -161,3 +161,12 @@ def test_first_specialist_failure_does_not_block_second_specialist(role_sdk):
     assert result.status == "needs_review" and len(requests) == 4 and state["closed"]
     assert [item.status for item in result.handoffs] == ["error", "success"]
     assert result.handoffs[1].findings[0].evidence == "The app crashes during upload."
+
+
+def test_oversized_query_is_rejected_before_client_creation(fake_openai):
+    from importlib import import_module
+    adapter = import_module("patterns.07-multi-agent-collaboration.openai_version.openai_collaboration")
+    client, requests = fake_openai()
+    with pytest.raises(ValueError,match="1000"):
+        adapter.run_openai_collaboration("x"*1001)
+    assert not requests and client.options is None

@@ -13,10 +13,10 @@ from pathlib import Path
 import sys
 
 if __package__:
-    from ..app import ParallelResult, run_parallel_analysis
+    from ..app import ParallelResult, run_parallel_analysis, validate_inputs
 else:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-    from app import ParallelResult, run_parallel_analysis
+    from app import ParallelResult, run_parallel_analysis, validate_inputs
 
 DEFAULT_MODEL = "gpt-6-astra"
 TASK_PROMPTS = {
@@ -33,8 +33,7 @@ async def run_openai_parallel(
     text: str, model: str | None = None, *, task_timeout: float = 30.0
 ) -> ParallelResult:
     """Use one async client for three independent requests; merge locally."""
-    if not text.strip():
-        raise ValueError("Please provide a non-empty query")
+    validate_inputs(text, task_timeout)
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key:
         raise ValueError("Missing OPENAI_API_KEY. Export it before running this example.")
@@ -43,11 +42,11 @@ async def run_openai_parallel(
     # Local examples and fake-SDK tests do not require the real package.
     from openai import AsyncOpenAI
 
-    async with AsyncOpenAI(api_key=api_key, max_retries=0) as client:
+    async with AsyncOpenAI(api_key=api_key, timeout=min(30.0, task_timeout), max_retries=0) as client:
         async def analyze(query: str, instruction: str) -> str:
             response = await client.responses.create(
                 model=selected_model,
-                reasoning={"effort": "low"},
+                reasoning={"effort": "low"}, max_output_tokens=1000, store=False,
                 instructions=instruction,
                 input=query,
             )

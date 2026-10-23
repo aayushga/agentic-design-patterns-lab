@@ -99,3 +99,8 @@ has a separate lifetime episode limit for successful, ratable replies.
 Offline tests use fake SDK responses and blocked network connections. They need
 no real SDK or key and incur no API charges. They validate feedback propagation
 and orchestration, not live model quality, account access, or measured learning gains.
+
+Request safeguards: output is capped at 1500 tokens per attempt, response
+storage is disabled (`store=False`), SDK retries are disabled, and clients close on
+success or failure. SDK timeouts and cooperative application deadlines are not a
+hard whole-run deadline. Token/request caps do not cap input charges or dollar spend.

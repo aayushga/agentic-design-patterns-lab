@@ -94,8 +94,8 @@ def revise_draft(query: str, draft: str, critique: Critique) -> str:
 
 def validate_inputs(query: str, max_revisions: int, initial_draft: str | None) -> None:
     """Reject invalid configuration before any producer or API call."""
-    if not isinstance(query, str) or not query.strip():
-        raise ValueError("Please provide a non-empty query")
+    if not isinstance(query, str) or not query.strip() or len(query) > 1000:
+        raise ValueError("Please provide a non-empty query of at most 1000 characters")
     if type(max_revisions) is not int or not 0 <= max_revisions <= MAX_REVISIONS:
         raise ValueError(f"max_revisions must be an integer between 0 and {MAX_REVISIONS}")
     if initial_draft is not None and (not isinstance(initial_draft, str) or not initial_draft.strip()):

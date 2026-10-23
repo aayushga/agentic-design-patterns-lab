@@ -45,6 +45,8 @@ def run_openai_reflection(
 ) -> ReflectionResult:
     """Use separate producer/critic prompts and the same bounded local loop."""
     validate_inputs(query, max_revisions, initial_draft)
+    if initial_draft is not None and len(initial_draft) > 1000:
+        raise ValueError("initial_draft must contain at most 1000 raw characters")
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key:
         raise ValueError("Missing OPENAI_API_KEY. Export it before running this example.")
@@ -56,7 +58,7 @@ def run_openai_reflection(
             options = {"text": {"format": CRITIQUE_FORMAT}} if critique else {}
             response = client.responses.create(
                 model=selected_model,
-                reasoning={"effort": "low"},
+                reasoning={"effort": "low"}, max_output_tokens=2000, store=False,
                 instructions=instructions,
                 input=json.dumps(payload),
                 **options,

@@ -73,7 +73,7 @@ def run_openai_tool_use(query: str, model: str | None = None, *,
                                           "error": last.error}, allow_nan=False),
                 })
             response = client.responses.create(
-                model=selected_model, reasoning={"effort": "low"},
+                model=selected_model, reasoning={"effort": "low"}, max_output_tokens=1500, store=False,
                 instructions=INSTRUCTIONS + f" Remaining tool calls: {max_tool_calls - len(history)}.",
                 tools=TOOL_DEFINITIONS, parallel_tool_calls=False,
                 input=list(transcript),

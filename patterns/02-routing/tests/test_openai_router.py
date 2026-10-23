@@ -85,3 +85,19 @@ def test_cli_configuration_error(monkeypatch):
     monkeypatch.setattr("builtins.input", lambda _: "help")
     with pytest.raises(SystemExit, match="Missing OPENAI_API_KEY"):
         router.main()
+
+
+@pytest.mark.parametrize("text",[None,42,"x"*1001])
+def test_input_size_or_type_is_rejected_before_client_creation(fake_openai,text):
+    client,requests = fake_openai()
+    with pytest.raises(ValueError,match="non-empty"):
+        router.route_with_openai(text)
+    assert not requests and client.options is None
+
+
+def test_router_rejects_extra_fields_and_bounds_explanations(fake_openai):
+    for payload in [{"route":"billing","confidence":"high","reason":"match","extra":1},
+                    {"route":"billing","confidence":"high","reason":"x"*501}]:
+        client,_ = fake_openai(json.dumps(payload))
+        assert router.route_with_openai("invoice").selected_route == "unknown"
+        assert client.closed

@@ -187,3 +187,12 @@ def test_model_override_precedence(tool_sdk, monkeypatch, explicit, expected):
     monkeypatch.setenv("OPENAI_MODEL", "gpt-6.1-sol")
     module.run_openai_tool_use("ticket", model=explicit)
     assert requests[0]["model"] == expected
+
+
+def test_oversized_query_is_rejected_before_client_creation(fake_openai):
+    from importlib import import_module
+    adapter = import_module("patterns.05-tool-use.openai_version.openai_tool_use")
+    client, requests = fake_openai()
+    with pytest.raises(ValueError,match="1000"):
+        adapter.run_openai_tool_use("x"*1001)
+    assert not requests and client.options is None

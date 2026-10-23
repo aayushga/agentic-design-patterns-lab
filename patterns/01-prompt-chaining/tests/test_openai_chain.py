@@ -81,3 +81,19 @@ def test_api_failure_stops_chain(fake_openai):
 def test_cli_configuration_error():
     with pytest.raises(SystemExit, match="OPENAI_API_KEY"):
         chain.main()
+
+
+@pytest.mark.parametrize("text",[None,42,"x"*20001])
+def test_input_size_or_type_is_rejected_before_client_creation(fake_openai,text):
+    client,requests = fake_openai()
+    with pytest.raises(ValueError,match="non-empty"):
+        chain.run_prompt_chain(text)
+    assert not requests and client.options is None
+
+
+def test_chain_client_closes_on_failure_and_disables_hidden_retries(fake_openai):
+    client,requests = fake_openai(error=RuntimeError("failure"))
+    with pytest.raises(RuntimeError):
+        chain.run_prompt_chain("query")
+    assert client.closed and client.options["max_retries"] == 0
+    assert len(requests) == 1
