@@ -70,6 +70,30 @@ def test_supplied_draft_uses_only_critic(reflection_sdk):
     assert result.initial_draft == "ready" and len(requests) == 1
 
 
+@pytest.mark.parametrize("draft", [
+    "x" * 1001,
+    "x" * 100_000,
+    " " * 1000 + "x",
+    "x" + " " * 1000,
+], ids=["over_limit", "very_large", "leading_whitespace", "trailing_whitespace"])
+def test_oversized_initial_draft_is_rejected_before_client_creation(reflection_sdk, draft):
+    requests, state = reflection_sdk(ACCEPT)
+    with pytest.raises(ValueError, match="initial_draft.*1000"):
+        router.run_openai_reflection("ticket", initial_draft=draft)
+    assert not requests and state["options"] is None
+
+
+@pytest.mark.parametrize("draft", ["x" * 1000, " " + "x" * 998 + " "],
+                         ids=["exact_limit", "exact_limit_with_whitespace"])
+def test_initial_draft_at_raw_character_limit_is_reviewed(reflection_sdk, draft):
+    requests, state = reflection_sdk(ACCEPT)
+    result = router.run_openai_reflection("ticket", initial_draft=draft)
+    assert result.approved and result.initial_draft == draft.strip()
+    assert len(requests) == 1
+    assert json.loads(requests[0]["input"]) == {"ticket": "ticket", "draft": draft.strip()}
+    assert state["closed"]
+
+
 def test_default_budget_caps_requests_and_reviews_final_draft(reflection_sdk):
     requests, _ = reflection_sdk("first", REJECT, "second", REJECT, "third", REJECT)
     result = router.run_openai_reflection("ticket")
