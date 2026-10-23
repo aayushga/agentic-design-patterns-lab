@@ -4,6 +4,7 @@ This local support-reply demo uses transparent rules, not an API or model.
 """
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import asdict, dataclass
 import json
 import re
@@ -141,9 +142,9 @@ def run_reflection(
     revisions = 0
 
     while True:
-        critique = reviewer(query, draft)
+        critique = deepcopy(reviewer(query, draft))
         _validate_critique(critique)
-        history.append(ReflectionStep(revisions, draft, critique))
+        history.append(ReflectionStep(revisions, draft, deepcopy(critique)))
         seen.add(" ".join(draft.split()))
         if critique.approved:
             stop_reason = "approved"
@@ -151,7 +152,7 @@ def run_reflection(
         if revisions >= max_revisions:
             stop_reason = "revision_limit"
             break
-        candidate = _validated_text(reviser(query, draft, critique))
+        candidate = _validated_text(reviser(query, draft, deepcopy(critique)))
         if " ".join(candidate.split()) in seen:
             stop_reason = "no_progress"
             break

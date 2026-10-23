@@ -5,6 +5,7 @@ Tools are read-only demo functions; no network, model, or code evaluation is use
 """
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import asdict, dataclass
 import json
 import math
@@ -145,14 +146,14 @@ def run_tool_use(query: str, *, decider: Decider = local_decider,
     history = []
     seen_ids = set()
     while True:
-        decision = decider(query, history)
+        decision = decider(query, deepcopy(history))
         if not isinstance(decision, Decision) or (decision.tool_call is None) == (decision.final_response is None):
             raise ValueError("Decider must return exactly one tool call or final response")
         if decision.final_response is not None:
             if not isinstance(decision.final_response, str) or not decision.final_response.strip():
                 raise ValueError("Final response must contain text")
             return ToolUseResult(query, decision.final_response.strip(), "completed", history)
-        call = decision.tool_call
+        call = deepcopy(decision.tool_call)
         if (not isinstance(call, ToolCall) or not isinstance(call.call_id, str)
                 or not call.call_id.strip() or not isinstance(call.name, str) or not call.name.strip()):
             raise ValueError("Tool call requires a non-empty call ID and tool name")

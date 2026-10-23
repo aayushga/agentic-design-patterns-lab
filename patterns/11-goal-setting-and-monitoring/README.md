@@ -125,3 +125,7 @@ Tests cover observed progress, adaptation, immutable goals/state, target scope,
 stalls, budget boundaries, cooperative deadlines, invalid model output, API failure,
 request construction, and client cleanup. Model responses are faked and network
 connections are blocked. Tests need neither the OpenAI SDK nor an API key.
+
+Injected clocks must return finite, nondecreasing numeric readings. Invalid readings
+raise an error before a further action/dispatch or late answer is released. A goal run
+aborts on a clock fault instead of claiming deadline-compliant completion.

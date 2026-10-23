@@ -143,3 +143,14 @@ def test_planner_failure_is_not_a_success():
         raise RuntimeError("planner unavailable")
     with pytest.raises(RuntimeError, match="planner unavailable"):
         app.run_planning("offsite", planner=broken)
+
+
+def test_planner_cannot_change_host_budget_before_validation():
+    from dataclasses import FrozenInstanceError
+    def planner(request, venues, meals):
+        with pytest.raises(FrozenInstanceError):
+            request.budget = 1000
+        return app.Plan("No feasible choice", [])
+    result = app.run_planning("offsite", budget=1, planner=planner)
+    assert result.status == "no_feasible_plan" and result.request.budget == 1
+    assert result.proposal is None

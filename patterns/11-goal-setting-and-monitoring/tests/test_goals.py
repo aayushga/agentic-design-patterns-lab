@@ -138,3 +138,20 @@ def test_success_on_final_allowed_step_and_already_triaged_no_change():
     assert result.status == "completed"
     unchanged, observation = app.apply_action(result.tickets, goal, app.Action("triage", "T-1"))
     assert unchanged == result.tickets and observation.status == "no_change"
+
+
+@pytest.mark.parametrize("bad", [float("nan"),float("inf"),float("-inf"),True,"invalid",10**400])
+def test_invalid_clock_never_applies_an_action(bad):
+    tickets = (app.Ticket("T-1"),)
+    ticks = iter([0,0,bad])
+    with pytest.raises(ValueError, match="Clock"):
+        app.run_goal(tickets, app.Goal(("T-1",)), clock=lambda:next(ticks))
+    assert not tickets[0].triaged
+
+
+def test_clock_rollback_after_selection_does_not_apply_action():
+    tickets = (app.Ticket("T-1"),)
+    ticks = iter([10,10,9])
+    with pytest.raises(ValueError, match="Clock"):
+        app.run_goal(tickets, app.Goal(("T-1",)), clock=lambda:next(ticks))
+    assert not tickets[0].triaged

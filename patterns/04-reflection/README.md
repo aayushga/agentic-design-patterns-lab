@@ -93,3 +93,7 @@ Tests cover feedback delivery, final reviews, early approval, budget exhaustion,
 repeated drafts, malformed critiques, missing keys, API errors, and model
 selection. SDK calls are replaced with fakes; network connections are blocked.
 The real OpenAI package is not needed to run the suite.
+
+Reviewer feedback is copied before recording, and revisers receive a separate copy.
+Editing callback inputs cannot turn a rejected critique into host approval or rewrite its history.
+Callbacks are still trusted Python code; this is not a sandbox.

@@ -141,3 +141,7 @@ Offline tests cover revision-bound approval, edits, rejection/revocation, expiry
 duplicate dispatch, queue bounds, immutable snapshots, actual interactive command
 handling, and fake model outputs/errors. Tests block network connections and need
 neither an OpenAI SDK installation nor an API key.
+
+Injected clocks must return finite, nondecreasing numeric readings. Invalid readings
+raise an error before a further action/dispatch or late answer is released. Stateful
+controllers reject subsequent work after a clock fault; create a new controller.

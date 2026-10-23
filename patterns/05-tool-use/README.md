@@ -123,3 +123,7 @@ Tests use fake SDK responses and block network connections. They cover dependent
 calls, result replay, error recovery, argument validation, duplicate IDs, budgets,
 malformed model responses, missing keys, and client cleanup. No API key or real
 OpenAI SDK is needed to run them.
+
+Deciders receive a copy of history, and executed tool arguments are snapshotted.
+Editing callback inputs cannot erase the execution count or rewrite observed tool facts.
+Callbacks are still trusted Python code; this is not a sandbox.

@@ -192,3 +192,31 @@ def test_approval_entered_after_deadline_is_blocked():
         return "approve"
     result = app.review_interactively(queue, review.review_id, read=late_input)
     assert result.state == "expired" and not queue.outbox
+
+
+@pytest.mark.parametrize("bad", [float("nan"),float("inf"),float("-inf"),True,"invalid",10**400])
+def test_invalid_clock_blocks_submission_and_approved_dispatch(bad):
+    with pytest.raises(ValueError,match="Clock"):
+        app.ReviewQueue(clock=lambda:bad).submit("query","draft")
+    now = [10]
+    queue = app.ReviewQueue(clock=lambda:now[0])
+    review = queue.submit("query","draft")
+    queue.approve(review.review_id,1,reviewer="human")
+    now[0] = bad
+    with pytest.raises(ValueError,match="Clock"):
+        queue.dispatch(review.review_id,1)
+    assert not queue.outbox
+    now[0] = 20
+    with pytest.raises(ValueError,match="Clock"):
+        queue.dispatch(review.review_id,1)
+
+
+def test_clock_rollback_revokes_controller_usability_without_dispatch():
+    now = [10]
+    queue = app.ReviewQueue(clock=lambda:now[0])
+    review = queue.submit("query","draft")
+    queue.approve(review.review_id,1,reviewer="human")
+    now[0] = 9
+    with pytest.raises(ValueError,match="Clock"):
+        queue.dispatch(review.review_id,1)
+    assert not queue.outbox

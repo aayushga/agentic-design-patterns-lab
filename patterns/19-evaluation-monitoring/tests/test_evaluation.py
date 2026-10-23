@@ -215,3 +215,30 @@ def test_cli_explicit_gate_exit(monkeypatch, capsys, variant, limit, exit_code):
     else:
         app.main()
     assert json.loads(capsys.readouterr().out)["gate"]["passed"] is (exit_code == 0)
+
+
+@pytest.mark.parametrize("name,value", [("accuracy",float("nan")),("coverage",float("inf")),
+    ("error_rate",float("nan")),("p95_latency_ms",-1),("p95_latency_ms",None),
+    ("accuracy",True),("attempted_count",True),("coverage",10**400)])
+def test_malformed_gate_metrics_fail_closed(name,value):
+    metrics = dict(run().metrics)
+    metrics[name] = value
+    assert app.gate_metrics(metrics) == app.Gate(False,("invalid_metrics",))
+    assert app.gate_metrics({}) == app.Gate(False,("invalid_metrics",))
+
+
+def test_accuracy_drop_exactly_at_boundary_is_not_a_regression():
+    cases = [app.EvalCase(f"case{i}","Invoice question","billing") for i in range(20)]
+    baseline = app.evaluate(cases)
+    predictions = iter([app.Prediction("billing")]*19+[app.Prediction("support")])
+    candidate = app.evaluate(cases,lambda query:next(predictions))
+    comparison = app.compare_reports(baseline,candidate,max_accuracy_drop=.05)
+    assert comparison["accuracy_delta"] == pytest.approx(-.05)
+    assert comparison["reasons"] == []
+    assert app.compare_reports(baseline,candidate,max_accuracy_drop=.049)["reasons"] == ["accuracy_regression"]
+
+
+def test_comparison_with_missing_metrics_is_rejected_before_reading_them():
+    report = run()
+    report.metrics.clear()
+    assert app.compare_reports(report, run())["reasons"] == ["invalid_metrics"]

@@ -165,7 +165,20 @@ def run_goal(tickets: tuple[Ticket, ...], goal: Goal, *,
     forcibly interrupt a blocking chooser. Callers must also bound I/O timeouts.
     """
     progress = measure(tickets, goal)
-    started = clock()
+    last_clock = None
+    def now():
+        nonlocal last_clock
+        try:
+            value = clock()
+            valid = (type(value) in (int, float) and math.isfinite(value)
+                     and (last_clock is None or value >= last_clock))
+        except Exception:
+            valid = False
+        if not valid:
+            raise ValueError("Clock must return finite, nondecreasing numbers") from None
+        last_clock = value
+        return value
+    started = now()
     history: list[Step] = []
     stalled = 0
 
@@ -175,17 +188,17 @@ def run_goal(tickets: tuple[Ticket, ...], goal: Goal, *,
     if not progress.pending_ids:
         return finish("completed", "All required tickets were already triaged.")
     for number in range(1, goal.max_steps + 1):
-        if clock() - started >= goal.deadline_seconds:
+        if now() - started >= goal.deadline_seconds:
             return finish("deadline_exceeded", "Time budget reached before the next action.")
         action = chooser(goal, tickets, progress, tuple(history))
-        if clock() - started >= goal.deadline_seconds:
+        if now() - started >= goal.deadline_seconds:
             return finish("deadline_exceeded", "Time budget reached while selecting an action; action was not applied.")
         tickets, observation = apply_action(tickets, goal, action)
         current = measure(tickets, goal)
         stalled = stalled + 1 if current.remaining_work >= progress.remaining_work else 0
         progress = current
         history.append(Step(number, action, observation, progress, stalled))
-        if clock() - started >= goal.deadline_seconds:
+        if now() - started >= goal.deadline_seconds:
             return finish("deadline_exceeded", "Time budget reached; review observed progress before continuing.")
         if not progress.pending_ids:
             return finish("completed", "All required tickets were triaged within the budgets.")
