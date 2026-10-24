@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="440" viewBox="0 0 1100 440" role="img" aria-labelledby="title description">
+<title id="title">Free local Reflection example</title>
+<desc id="description">Selected output from an actual run: the initial reply is revised once, approved, and returned with its review history. No API key or third-party packages are needed.</desc>
+<rect width="1100" height="440" rx="14" fill="#101823"/>
+<path d="M14 0H1086Q1100 0 1100 14V42H0V14Q0 0 14 0" fill="#202d3d"/>
+<circle cx="25" cy="21" r="6" fill="#fa6b65"/><circle cx="47" cy="21" r="6" fill="#f5c451"/><circle cx="69" cy="21" r="6" fill="#5bd48a"/>
+<text x="103" y="27" font-family="Menlo,Consolas,monospace" font-size="15" fill="#dce5ee">Pattern 04 · Reflection · local demo</text>
+<g font-family="Menlo,Consolas,monospace" font-size="17" xml:space="preserve"><text x="28" y="76" fill="#9bd2ff">$ python3 patterns/04-reflection/app.py</text>
+<text x="28" y="110" fill="#9da9ba">Selected fields from the JSON output:</text>
+<text x="28" y="144" fill="#dce5ee">{</text>
+<text x="28" y="168" fill="#dce5ee">  &quot;initial_draft&quot;: &quot;We received your request.&quot;,</text>
+<text x="28" y="192" fill="#7ee2a8">  &quot;approved&quot;: true,</text>
+<text x="28" y="216" fill="#dce5ee">  &quot;revisions&quot;: 1,</text>
+<text x="28" y="240" fill="#7ee2a8">  &quot;stop_reason&quot;: &quot;approved&quot;</text>
+<text x="28" y="264" fill="#dce5ee">}</text>
+<text x="28" y="300" fill="#9da9ba">Final reply:</text>
+<text x="28" y="326" fill="#dce5ee">Thank you for contacting support. We received your request. You reported: &quot;I was charged twice</text>
+<text x="28" y="350" fill="#dce5ee">for my subscription.&quot; Please share the relevant invoice number or error message so we can</text>
+<text x="28" y="374" fill="#dce5ee">investigate.</text></g>
+<text x="28" y="417" font-family="Menlo,Consolas,monospace" font-size="14" fill="#9da9ba">Rule-based learning example · no API key · no package installation</text>
+</svg>

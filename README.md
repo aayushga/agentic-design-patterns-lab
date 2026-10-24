@@ -1,277 +1,105 @@
 # Agentic Design Patterns Lab
 
-A hands-on, portfolio-ready lab for implementing **agentic AI design patterns** with clean, practical Python examples.
+**21 agentic AI design patterns in plain Python, with offline tests and optional OpenAI versions.**
 
-This is a learning lab, not a deployable multi-user service. See the
-[security boundaries](SECURITY.md), [engineering review](docs/engineering-review.md),
-and [dependency/platform policy](docs/dependencies.md).
+Learn the control flow without an agent orchestration framework. Nineteen local
+patterns use only the standard library; MCP and A2A use their official protocol
+SDKs. Local examples demonstrate the patterns with rules and fictional data.
+Optional OpenAI versions add model calls separately.
 
-This repository is focused on:
-- Learning core agentic patterns by building them from scratch
-- Keeping implementations beginner-friendly and easy to run locally
-- Demonstrating software engineering hygiene (tests, structure, docs)
-- Showcasing production-lean thinking without unnecessary complexity
+## Try a free example
 
-## What You'll Find in Each Pattern
-
-Each pattern includes:
-- Clear explanation of the design pattern
-- When and why to use it
-- Minimal runnable Python implementation
-- Basic example
-- Realistic example
-- Unit tests
-- No external API dependency (when possible)
-
-## Pattern Roadmap (21 Patterns)
-
-- [x] 01. Prompt Chaining
-- [x] 02. Routing
-- [x] 03. Parallelization
-- [x] 04. Reflection
-- [x] 05. Tool Use
-- [x] 06. Planning
-- [x] 07. Multi-Agent Collaboration
-- [x] 08. Memory Management
-- [x] 09. Learning and Adaptation
-- [x] 10. Model Context Protocol (MCP)
-- [x] 11. Goal Setting and Monitoring
-- [x] 12. Exception Handling and Recovery
-- [x] 13. Human-in-the-Loop
-- [x] 14. Knowledge Retrieval (RAG)
-- [x] 15. Inter-Agent Communication (A2A)
-- [x] 16. Resource-Aware Optimization
-- [x] 17. Reasoning Techniques
-- [x] 18. Guardrails/Safety Patterns
-- [x] 19. Evaluation and Monitoring
-- [x] 20. Prioritization
-- [x] 21. Exploration and Discovery
-
-The roadmap follows Antonio Gulli's *Agentic Design Patterns: A Hands-On Guide to
-Building Intelligent Systems*. Implementations are original, simplified Python
-exercises inspired by the chapters. ReAct, self-consistency, and related techniques
-can be explored within the relevant chapters instead of replacing the book's sequence.
-
-## Current Progress
-
-- [Pattern 01: Prompt Chaining](patterns/01-prompt-chaining/): sequential summary,
-  theme extraction, and structured response.
-- [Pattern 02: Routing](patterns/02-routing/): intent classification and dispatch
-  to billing, support, sales, or a fallback handler.
-- [Pattern 03: Parallelization](patterns/03-parallelization/): concurrent ticket
-  analyses, followed by a local merge with per-task failure handling.
-
-- [Pattern 04: Reflection](patterns/04-reflection/): a support-reply draft,
-  critique, and revision loop with explicit stopping conditions.
-- [Pattern 05: Tool Use](patterns/05-tool-use/): validated function calls,
-  observations, and dependent order lookup and calculation.
-- [Pattern 06: Planning](patterns/06-planning/): an explicit offsite plan,
-  constraint validation, simulated execution, and bounded replanning.
-- [Pattern 07: Multi-Agent Collaboration](patterns/07-multi-agent-collaboration/):
-  supervisor delegation, specialist handoffs, and a combined support reply.
-- [Pattern 08: Memory Management](patterns/08-memory-management/): bounded chat
-  history, session state, and explicit SQLite preferences across sessions.
-- [Pattern 09: Learning and Adaptation](patterns/09-learning-and-adaptation/):
-  explicit feedback updates a contextual reply-strategy policy.
-- [Pattern 10: Model Context Protocol](patterns/10-model-context-protocol/): real
-  local MCP discovery, tools, resources, prompts, and an optional model bridge.
-
-- [Pattern 11: Goal Setting and Monitoring](patterns/11-goal-setting-and-monitoring/):
-  fixed triage goals, measured progress, adaptation, and bounded stopping.
-
-- [Pattern 12: Exception Handling and Recovery](patterns/12-exception-handling-and-recovery/):
-  classified failures, bounded retries, validated fallbacks, and honest degradation.
-
-- [Pattern 13: Human-in-the-Loop](patterns/13-human-in-the-loop/):
-  human review, revision-bound approval, edits, rejection, and simulated dispatch.
-
-- [Pattern 14: Knowledge Retrieval (RAG)](patterns/14-knowledge-retrieval/):
-  paragraph retrieval, bounded evidence, source citations, and abstention.
-
-- [Pattern 15: Inter-Agent Communication (A2A)](patterns/15-inter-agent-communication/):
-  Agent Card discovery, real JSON-RPC delegation, resumable tasks, and result artifacts.
-
-- [Pattern 16: Resource-Aware Optimization](patterns/16-resource-aware-optimization/):
-  response-profile selection, conservative resource reservations, cache reuse, and bounded fallback.
-
-- [Pattern 17: Reasoning Techniques](patterns/17-reasoning-techniques/):
-  exact arithmetic verification, bounded search over alternatives, and model proposal correction.
-
-- [Pattern 18: Guardrails/Safety Patterns](patterns/18-guardrails-safety/):
-  layered input screening, redaction, host authorization, action limits, and output validation.
-
-- [Pattern 19: Evaluation and Monitoring](patterns/19-evaluation-monitoring/):
-  labeled cases, exact-match grading, honest coverage/usage, quality gates, and rolling alerts.
-
-- [Pattern 20: Prioritization](patterns/20-prioritization/):
-  feasible task ranking, explicit scores, dependencies, work budgets, and dynamic reprioritization.
-
-- [Pattern 21: Exploration and Discovery](patterns/21-exploration-discovery/):
-  evidence-driven experiments, expanding frontiers, novelty, bounded discovery, and explicit unknowns.
-
-Each includes a default local implementation, basic and advanced examples, an
-optional OpenAI implementation, and offline tests. All 21 patterns in the roadmap are implemented as simplified learning examples.
-
-## Run and Test
-
-Use Python 3.11 or newer for the full lab (the MCP SDK v2 requirement).
-Read the [Intel macOS dependency note](docs/dependencies.md#intel-macos-limitation)
-before a full binary-only install on that platform; local standard-library patterns
-do not require the affected protocol dependency.
-Patterns 01–09 and 11–21 also support Python 3.10. From the repository root:
+With Git and Python 3.10 or newer:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade 'pip>=26.2,<27'
-python -m pip install --only-binary=:all: -r requirements.txt
-python -m pytest
-python patterns/01-prompt-chaining/app.py
-python patterns/02-routing/app.py
-python patterns/03-parallelization/app.py
-python patterns/04-reflection/app.py
-python patterns/05-tool-use/app.py
-python patterns/06-planning/app.py
-python patterns/07-multi-agent-collaboration/app.py
-python patterns/08-memory-management/app.py
-python patterns/09-learning-and-adaptation/app.py
-python patterns/10-model-context-protocol/app.py
-python patterns/11-goal-setting-and-monitoring/app.py
-python patterns/12-exception-handling-and-recovery/app.py
-python patterns/13-human-in-the-loop/app.py
-python patterns/14-knowledge-retrieval/app.py
-python patterns/15-inter-agent-communication/app.py
-python patterns/16-resource-aware-optimization/app.py
-python patterns/17-reasoning-techniques/app.py
-python patterns/18-guardrails-safety/app.py
-python patterns/19-evaluation-monitoring/app.py
-python patterns/20-prioritization/app.py
-python patterns/21-exploration-discovery/app.py
+git clone https://github.com/aayushga/agentic-design-patterns-lab.git
+cd agentic-design-patterns-lab
+python3 patterns/04-reflection/app.py
 ```
 
-Patterns 01–09, 11–14, and 16–21 use only the Python standard library for local examples.
-Pattern 10 uses the free official MCP SDK and local stdio subprocesses. Pattern 15
-uses the free official A2A SDK and in-memory HTTP transport. The test suite uses
-pytest, fake API responses, and blocks network connections; no API key is needed.
-You can also run `python -m pytest` from any pattern folder.
+This Reflection demo needs no package installation or API key. It drafts a reply,
+checks it against a small rubric, revises it, and prints the reviewed result.
 
-## GitHub Actions
+![Condensed output from the local Reflection demo: an incomplete reply is revised once and approved.](docs/assets/reflection-demo.svg)
+
+The preview shows selected fields from an actual run. The script prints the full
+JSON result, including both critiques and the draft history.
+
+## Explore all 21 patterns
+
+Each folder contains a pattern explanation, a local implementation, basic and
+advanced examples, offline tests, and an optional OpenAI version.
+
+- [x] 01. [Prompt Chaining](patterns/01-prompt-chaining/)
+- [x] 02. [Routing](patterns/02-routing/)
+- [x] 03. [Parallelization](patterns/03-parallelization/)
+- [x] 04. [Reflection](patterns/04-reflection/)
+- [x] 05. [Tool Use](patterns/05-tool-use/)
+- [x] 06. [Planning](patterns/06-planning/)
+- [x] 07. [Multi-Agent Collaboration](patterns/07-multi-agent-collaboration/)
+- [x] 08. [Memory Management](patterns/08-memory-management/)
+- [x] 09. [Learning and Adaptation](patterns/09-learning-and-adaptation/)
+- [x] 10. [Model Context Protocol (MCP)](patterns/10-model-context-protocol/)
+- [x] 11. [Goal Setting and Monitoring](patterns/11-goal-setting-and-monitoring/)
+- [x] 12. [Exception Handling and Recovery](patterns/12-exception-handling-and-recovery/)
+- [x] 13. [Human-in-the-Loop](patterns/13-human-in-the-loop/)
+- [x] 14. [Knowledge Retrieval (RAG)](patterns/14-knowledge-retrieval/)
+- [x] 15. [Inter-Agent Communication (A2A)](patterns/15-inter-agent-communication/)
+- [x] 16. [Resource-Aware Optimization](patterns/16-resource-aware-optimization/)
+- [x] 17. [Reasoning Techniques](patterns/17-reasoning-techniques/)
+- [x] 18. [Guardrails/Safety Patterns](patterns/18-guardrails-safety/)
+- [x] 19. [Evaluation and Monitoring](patterns/19-evaluation-monitoring/)
+- [x] 20. [Prioritization](patterns/20-prioritization/)
+- [x] 21. [Exploration and Discovery](patterns/21-exploration-discovery/)
+
+The roadmap follows Antonio Gulli's
+*[Agentic Design Patterns: A Hands-On Guide to Building Intelligent Systems](https://link.springer.com/book/10.1007/978-3-032-01402-3)*.
+These are original, simplified learning exercises inspired by the chapters.
+
+## Run tests and protocol examples
+
+See the [local setup and testing guide](docs/running-local.md) for the full lab,
+standalone suites, and free MCP/A2A examples. Python 3.11 or newer is required for
+the complete lab; the supported subset also runs on Python 3.10.
+
+The full installation includes protocol dependencies. Intel Mac users should read
+the [platform limitation](docs/dependencies.md#intel-macos-limitation) first.
+The quick-start Reflection demo above does not require those dependencies.
+
+Tests use fake model responses and block socket connections during collection and
+execution. They require no API key and make no live model requests. Separate HTTP
+contract tests exercise the real OpenAI SDK against an in-memory mock transport.
+
+## Optional OpenAI versions
+
+All 21 patterns also have an optional version using the official OpenAI Python SDK
+and Responses API. These versions incur API charges when deliberately run.
+
+Read the [OpenAI setup, model requirements, and request limits](docs/openai-versions.md),
+then follow the linked setup guide for your chosen pattern. Local-only users do
+not need the OpenAI SDK. Offline tests verify request construction and application
+behavior; they do not establish live model quality or account access.
+
+## Continuous checks
 
 [Python tests](https://github.com/aayushga/agentic-design-patterns-lab/actions/workflows/tests.yml)
-runs automatically on pushes and pull requests, using GitHub-hosted Ubuntu runners
-with Python 3.10, 3.11, 3.12, and 3.14. It runs the combined suite, each pattern's
-suite independently, and local examples. Python 3.10 covers Patterns 01–09 and 11–21; the
-newer versions also run the real MCP protocol tests and demos. No OpenAI API key
-or SDK is required, and the tests make no live API calls.
+cover Python 3.10, 3.11, 3.12, and 3.14 with each version's supported pattern subset,
+plus minimum/latest-compatible OpenAI SDK HTTP contracts.
+[Repository quality](https://github.com/aayushga/agentic-design-patterns-lab/actions/workflows/quality.yml)
+checks static analysis, application coverage, installation consistency, and known
+dependency vulnerabilities.
 
-The [Repository quality workflow](.github/workflows/quality.yml) adds static checks,
-application coverage, installation checks, and an installed-dependency audit.
-Standalone suites and local demos are discovered automatically; demo verification
-removes OpenAI variables and blocks socket connections. Dependency advisory checks
-use public metadata and require no model API key.
+CI uses GitHub-hosted Linux runners. Dependency downloads and advisory lookups use
+the network; model tests and local demos make no paid API calls.
 
-Review changes in a pull request's **Files changed** tab and results in **Checks**.
-Full logs are available under **Actions → Python tests**. Once the workflow is on
-the default branch, you can also start it manually with **Run workflow**.
-No local editor is required for review.
+## Scope and engineering notes
 
-## Optional OpenAI Versions
+This repository is a learning and portfolio lab. Production deployments need
+application-specific authentication, durable state, safe writes, and representative
+evaluations. See:
 
-- [Prompt Chaining setup](patterns/01-prompt-chaining/openai_version/README.md)
-- [Routing setup](patterns/02-routing/openai_version/README.md)
-- [Parallelization setup](patterns/03-parallelization/openai_version/README.md)
-- [Reflection setup](patterns/04-reflection/openai_version/README.md)
-- [Tool Use setup](patterns/05-tool-use/openai_version/README.md)
-- [Planning setup](patterns/06-planning/openai_version/README.md)
-- [Multi-Agent Collaboration setup](patterns/07-multi-agent-collaboration/openai_version/README.md)
-- [Memory Management setup](patterns/08-memory-management/openai_version/README.md)
-- [Learning and Adaptation setup](patterns/09-learning-and-adaptation/openai_version/README.md)
-- [MCP + OpenAI setup](patterns/10-model-context-protocol/openai_version/README.md)
-- [Goal Setting and Monitoring setup](patterns/11-goal-setting-and-monitoring/openai_version/README.md)
-- [Exception Handling and Recovery setup](patterns/12-exception-handling-and-recovery/openai_version/README.md)
-- [Human-in-the-Loop setup](patterns/13-human-in-the-loop/openai_version/README.md)
-- [Knowledge Retrieval setup](patterns/14-knowledge-retrieval/openai_version/README.md)
-- [A2A + OpenAI setup](patterns/15-inter-agent-communication/openai_version/README.md)
-- [Resource-Aware Optimization setup](patterns/16-resource-aware-optimization/openai_version/README.md)
-- [Reasoning Techniques setup](patterns/17-reasoning-techniques/openai_version/README.md)
-- [Guardrails/Safety setup](patterns/18-guardrails-safety/openai_version/README.md)
-- [Evaluation and Monitoring setup](patterns/19-evaluation-monitoring/openai_version/README.md)
-- [Prioritization setup](patterns/20-prioritization/openai_version/README.md)
-- [Exploration and Discovery setup](patterns/21-exploration-discovery/openai_version/README.md)
+- [Security boundaries](SECURITY.md)
+- [Engineering review and deployment recommendations](docs/engineering-review.md)
+- [Dependency and platform policy](docs/dependencies.md)
 
-All use the official OpenAI Python SDK and the Responses API. The default model
-is `gpt-6-astra` with low reasoning effort for Patterns 01–15 and 18–21. Pattern 16 uses low
-for economy and medium for thorough, with an optional separate economy model.
-Pattern 17 uses medium effort to propose arithmetic expressions for local checking.
-Set `OPENAI_MODEL` to override the model,
-or pass `model=` when calling the Python functions (which takes precedence).
-Overrides must support Responses and the configured reasoning effort; Routing, Reflection, Planning, Multi-Agent Collaboration, Learning and Adaptation, Goal Setting and Monitoring, Exception Handling and Recovery, Human-in-the-Loop, Knowledge Retrieval, Inter-Agent Communication, Reasoning Techniques, Guardrails/Safety, Evaluation and Monitoring, Prioritization, and Exploration and Discovery
-also require structured outputs; Tool Use and MCP require function calling. API usage is billed separately and requires access to the chosen model.
-The examples make three API requests for a chain, one for a routing decision, and
-up to three concurrent requests for parallel analysis. The parallel result is merged locally. Reflection makes up to six sequential
-requests with its default budget of two revisions, stopping earlier on approval
-or repeated drafts. Tool Use makes at most four model requests with its default
-budget of three tool calls; its tools execute locally using simulated data. Planning
-makes at most two model requests with its default one-replan budget and executes
-its validated plan locally against a fictional catalog. Multi-Agent Collaboration
-makes at most four sequential model requests for its supervisor, up to two
-specialists, and writer. Memory Management makes one request per ordinary chat
-turn, while explicit memory controls run locally; its interactive CLI defaults
-to at most five model requests per run. Learning and Adaptation makes one request
-per generated reply, with local feedback updates and a default five-attempt CLI
-budget; it changes the application policy, not model weights. MCP allows at most
-three model requests with its default two-tool budget; discovery and local
-protocol calls do not incur API charges. Goal Setting and Monitoring makes at most
-six requests with its default action budget, stopping on measured completion,
-stalls, or its cooperative time deadline; ticket actions and monitoring are local.
-Exception Handling and Recovery defaults to at most two model attempts with SDK
-retries disabled, then a local rule when fallback is permitted. Lookup retries
-and cached demo data are local; terminal model errors stop without model fallback.
-Human-in-the-Loop makes at most one model attempt to create a pending draft; human
-edits, approval, rejection, and simulated dispatch run locally without more requests.
-Knowledge Retrieval uses free local BM25 retrieval and at most one model synthesis
-request; no qualifying evidence means no model request. It uses no embedding API
-or vector database. Citation validation checks source IDs/excerpts, not semantic
-entailment of every generated claim. Inter-Agent Communication makes at most one
-model attempt for a complete valid ticket in its CLI; discovery, missing-input
-follow-ups, and task retrieval are local. The host owns protocol state and publishes
-a validated report artifact; the model does not choose endpoints or execute actions.
-Resource-Aware Optimization makes at most two model attempts for a query, subject to
-a shared call/output-token allowance and cooperative deadline. It reserves caps
-before each attempt, retains reservations on failure, and reuses exact session
-cache hits. Output-token allowances exclude input charges and are not dollar caps.
-Reasoning Techniques makes at most two model attempts, with up to three expression
-candidates per attempt. Python checks arithmetic exactly, returns machine-recomputed
-calculations, and sends rejected-candidate observations back for one correction.
-It does not expose private model reasoning or claim impossibility from model failure.
-Guardrails/Safety makes at most one action-proposal request after input and ownership
-checks. Host code restricts actions and order targets, validates outgoing facts, and
-never executes a write. Demo redaction/override patterns are limited examples, not
-a complete moderation, authentication, or prompt-injection defense. Evaluation and
-Monitoring defaults to three sequential routing requests, leaving explicit incomplete
-coverage on its eight-case dataset; `--max-cases 8` allows a full run. Reference
-labels stay in the host grader, SDK retries are disabled, and provider errors stop
-further calls. Gates and rolling alerts run locally; known token totals are not dollar caps.
-Prioritization makes at most one request to rank the host-eligible task set. Python
-validates the exact ID permutation, preserves hard constraints, and uses an explicit
-rule fallback on model failure. No eligible work or a zero model budget means no
-request; fictional work-minute budgets do not cap model charges. Exploration and
-Discovery allows at most three model proposals, only when several affordable
-experiments are offered. The host validates IDs, runs a fictional lab, and records
-evidence; failed model proposals disable further model calls and use local rules.
-Its six-experiment/eight-cost-unit defaults are simulated lab limits, not API dollar caps.
-
-The SDK is installed separately using each `openai_version/requirements.txt`,
-so local-only users do not need it. Scripts read exported environment variables;
-they do **not** automatically load `.env` files. The setup guides include the export step.
-
-Model migration reference: [OpenAI GPT-6 guide](https://developers.openai.com/api/docs/guides/latest-model).
-The migration removes `temperature=0`, uses low reasoning effort, and makes model
-selection configurable. Offline tests verify request construction and application
-behavior; they do not measure live model quality, latency, or account access.
-
-## Who This Is For
-
-- Engineers building practical AI systems
-- Learners exploring agent architecture fundamentals
-- Recruiters and hiring teams evaluating implementation quality quickly
+The code is available under the [MIT license](LICENSE).
