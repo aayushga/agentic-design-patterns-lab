@@ -6,4 +6,4 @@ cryptography>=50.0.2,<51
 pygments>=2.21.0,<3
 pytest>=9.1.1,<10
 # The real-SDK contract matrix tests 2.32.0 and the latest compatible 2.x.
-openai>=2.32.0,<3
+openai>=2.54.0,<3
