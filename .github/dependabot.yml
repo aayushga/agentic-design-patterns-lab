@@ -8,6 +8,10 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    # Major SDK migrations need explicit contract testing and policy updates.
+    ignore:
+      - dependency-name: openai
+        update-types: ['version-update:semver-major']
     groups:
       python-dependencies:
         patterns: ['*']

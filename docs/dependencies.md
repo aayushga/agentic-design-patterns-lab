@@ -19,6 +19,9 @@ applications should resolve and hash-pin their selected dependencies separately 
 each supported Python/platform combination, then audit and rebuild those locks.
 OpenAI is limited to the tested 2.x API line; upgrading to 3.x needs an explicit
 migration and contract validation. This does not change the selected Astra model.
+Routine Dependabot updates exclude OpenAI major-version changes. Review those in
+a dedicated migration PR that updates the SDK contract matrix and compatibility
+policy together; minor/patch updates within the supported 2.x line continue.
 
 ## Review findings (2026-10-22)
 
