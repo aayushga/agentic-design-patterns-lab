@@ -68,7 +68,7 @@ The quick-start Reflection demo above does not require those dependencies.
 
 Tests use fake model responses and block socket connections during collection and
 execution. They require no API key and make no live model requests. Separate HTTP
-contract tests exercise the real OpenAI SDK against an in-memory mock transport.
+contract tests exercise the real OpenAI SDK against a mock HTTP transport.
 
 ## Optional OpenAI versions
 

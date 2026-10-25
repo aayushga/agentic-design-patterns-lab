@@ -36,15 +36,17 @@ Ruff found three unused imports. Passing scanners did not catch the logic bugs b
 | Medium | Private local state easy to commit | Only `.env` was ignored; `.env.local` and persisted memory databases were not | Ignore credential variants, databases, editor metadata, and verification artifacts |
 | Maintenance | Repeated setup/CI inventories | Long duplicated install/demo lists could omit a pattern or drift | Shared requirements, discovered standalone suites/demos, and repository-contract tests |
 
-Fix PRs remain open for human review:
+The review fixes have been merged into `main` (status checked 2026-10-25):
 
-- [Host-owned state and time controls — PR #28](https://github.com/aayushga/agentic-design-patterns-lab/pull/28)
-- [Bounded SDK integrations and real HTTP contracts — PR #29](https://github.com/aayushga/agentic-design-patterns-lab/pull/29)
-- Repository quality, dependency policy, and this report are the third review change.
+- [Host-owned state and time controls — PR #28](https://github.com/aayushga/agentic-design-patterns-lab/pull/28), merged 2026-10-23.
+- [Bounded SDK integrations and real HTTP contracts — PR #29](https://github.com/aayushga/agentic-design-patterns-lab/pull/29), merged 2026-10-23, including the supplied-draft input-limit follow-up.
+- [Repository quality, dependency policy, and this report — PR #30](https://github.com/aayushga/agentic-design-patterns-lab/pull/30), merged 2026-10-23.
 
-The PRs are independently based on the reviewed main. Merge all three to obtain
-the complete set; a final combined validation checks that they work together.
-No PR is merged automatically by this review.
+The validation counts below describe the original review snapshots, rather than
+the current test inventory. Subsequent changes add coverage; consult the
+[Python tests](https://github.com/aayushga/agentic-design-patterns-lab/actions/workflows/tests.yml)
+and [repository quality](https://github.com/aayushga/agentic-design-patterns-lab/actions/workflows/quality.yml)
+workflows for current results.
 
 ## Architectural review across all patterns
 
