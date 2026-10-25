@@ -115,10 +115,15 @@ def scenario(number, tmp_path):
 
 
 @pytest.mark.parametrize("number",range(1,22))
-def test_every_adapter_serializes_bounded_requests_and_closes_clients(number,tmp_path,transport):
+@pytest.mark.parametrize("model_override", [None, "gpt-6.1-sol"], ids=["default", "sol_override"])
+def test_every_adapter_serializes_bounded_requests_and_closes_clients(
+    number,model_override,tmp_path,transport,monkeypatch
+):
     # A2A is imported by its app; skip just that case when its separate SDK is absent.
     if number == 15:
         pytest.importorskip("a2a")
+    if model_override is not None:
+        monkeypatch.setenv("OPENAI_MODEL", model_override)
     run, outputs = scenario(number,tmp_path)
     def handler(data,index):
         assert index < len(outputs), "Unexpected extra model request"
@@ -130,6 +135,7 @@ def test_every_adapter_serializes_bounded_requests_and_closes_clients(number,tmp
     assert clients and all(client.is_closed() for client in clients)
     assert all(option["max_retries"] == 0 and 0 < option["timeout"] <= 30 for option in options)
     assert all(request["store"] is False and 0 < request["max_output_tokens"] <= 2500 for request in requests)
+    assert all(request["model"] == (model_override or "gpt-6-astra") for request in requests)
     if number in (5,10):
         assert any(item.get("type") == "function_call_output" and item["call_id"] == "call_offline"
                    for item in requests[1]["input"])
