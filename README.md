@@ -80,6 +80,10 @@ then follow the linked setup guide for your chosen pattern. Local-only users do
 not need the OpenAI SDK. Offline tests verify request construction and application
 behavior; they do not establish live model quality or account access.
 
+To use GPT-6.1 Sol, set `OPENAI_MODEL=gpt-6.1-sol`. The
+[model-switching guide](docs/openai-versions.md#switch-models) covers terminal and
+Python overrides, switching back to Astra, and the separate economy-model setting.
+
 ## Continuous checks
 
 [Python tests](https://github.com/aayushga/agentic-design-patterns-lab/actions/workflows/tests.yml)

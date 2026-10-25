@@ -18,7 +18,7 @@ python -m pip install --upgrade 'pip>=26.2,<27'
 python -m pip install --only-binary=:all: -r patterns/01-prompt-chaining/openai_version/requirements.txt
 ```
 
-On Windows, activate with `.venv\Scripts\activate`. The examples use the tested
+In Windows Command Prompt, activate with `.venv\Scripts\activate`. The examples use the tested
 OpenAI SDK 2.x range; see the [dependency policy](dependencies.md). Protocol
 patterns also have their own SDK dependencies and platform requirements.
 
@@ -34,9 +34,109 @@ structured outputs, and function calling are documented in the
 (checked 2026-10-24). Account access and quotas are separate from a valid model ID.
 No live model request is needed to validate installation or run the offline tests.
 
-Set `OPENAI_MODEL` to choose another accessible model with the capabilities your
-pattern needs. The Python `model=` argument takes precedence. Request and output
-limits are not dollar caps; input and reasoning tokens may also incur charges.
+Request and output limits are not dollar caps; input and reasoning tokens may also
+incur charges.
+
+## Switch models
+
+The model is configurable in all 21 optional implementations. You do not need to
+edit their source files. This setting controls the example programs, independently
+of the model selected for your Codex chat.
+
+| Choice | Exact API model ID | Official reference |
+| --- | --- | --- |
+| Default | `gpt-6-astra` | [GPT-6 Astra](https://developers.openai.com/api/docs/models/gpt-6-astra) |
+| GPT-6.1 Sol | `gpt-6.1-sol` | [GPT-6.1 Sol](https://developers.openai.com/api/docs/models/gpt-6.1-sol) |
+
+Use the complete API model ID, such as `gpt-6.1-sol`, rather than `6.1`. Both
+models document Responses, structured outputs, function calling, and the low/medium
+reasoning settings used here (checked 2026-10-25). Changing the model preserves the
+pattern's existing reasoning effort, request limits, and output caps. It does not
+automatically select the provider's default reasoning effort.
+
+### Terminal setting
+
+For macOS/Linux shells such as zsh or bash, set the model in the terminal where
+you will run an optional example:
+
+```bash
+export OPENAI_MODEL=gpt-6.1-sol
+```
+
+For Windows PowerShell:
+
+```powershell
+$env:OPENAI_MODEL = "gpt-6.1-sol"
+```
+
+These commands only set an environment variable; they make no API request. Once
+the SDK and key are configured, your chosen optional script will use that model.
+For example, **deliberately running the following starts the billable Routing demo**:
+
+```bash
+python patterns/02-routing/openai_version/openai_router.py
+```
+
+The setting lasts for the current shell and its child processes. A new terminal
+needs its own setting unless you configure it in your shell profile. Editing
+`.env.example` or creating a `.env` file alone has no effect: these scripts do not
+load dotenv files. The free local `app.py` examples do not use this variable.
+
+### Python override and precedence
+
+An explicit `model=` argument takes precedence over `OPENAI_MODEL`. This example
+is **billable when executed**:
+
+```python
+from importlib import import_module
+
+router = import_module("patterns.02-routing.openai_version.openai_router")
+result = router.route_with_openai(
+    "I was charged twice.", model="gpt-6.1-sol"
+)
+```
+
+Selection order is: a non-empty explicit `model=` value, then a nonblank
+`OPENAI_MODEL`, then the built-in `gpt-6-astra` default. When reusing a responder in
+Patterns 08/09, set its `model=` at construction; that responder owns selection,
+and the runner rejects supplying both a responder and a separate model argument.
+
+### Switch back to Astra
+
+In zsh/bash, choose Astra explicitly:
+
+```bash
+export OPENAI_MODEL=gpt-6-astra
+```
+
+Or remove the override to restore the built-in default:
+
+```bash
+unset OPENAI_MODEL
+```
+
+In PowerShell, use `$env:OPENAI_MODEL = "gpt-6-astra"`, or remove the override with
+`Remove-Item Env:OPENAI_MODEL -ErrorAction SilentlyContinue`. An explicit Python
+`model=` argument still wins, so omit it if you want the environment/default.
+
+### Pattern 16: optional separate economy model
+
+Resource-Aware Optimization can use a different model for its economy profile.
+Its selection order is `economy_model=`, then `OPENAI_ECONOMY_MODEL`, then the
+main selected model. To make both profiles follow `OPENAI_MODEL`, omit the Python
+`economy_model=` argument and clear that separate environment override:
+
+```bash
+unset OPENAI_ECONOMY_MODEL
+```
+
+In PowerShell, use `Remove-Item Env:OPENAI_ECONOMY_MODEL -ErrorAction SilentlyContinue`.
+Alternatively, deliberately set `OPENAI_ECONOMY_MODEL=gpt-6.1-sol` for the economy
+profile; the same model-capability and billing requirements apply.
+
+The offline HTTP contracts check the default and `OPENAI_MODEL=gpt-6.1-sol` paths
+for every adapter without contacting a model endpoint. They verify configuration
+and serialization, not live output quality, pricing, quotas, or account access.
 
 ## Per-pattern setup and request behavior
 
