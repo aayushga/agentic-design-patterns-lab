@@ -25,6 +25,9 @@ checks it against a small rubric, revises it, and prints the reviewed result.
 The preview shows selected fields from an actual run. The script prints the full
 JSON result, including both critiques and the draft history.
 
+Read the [project write-up on Medium](https://medium.com/@aayushgarg86/21-agentic-design-patterns-in-plain-python-with-offline-tests-4b824b7417f4)
+for the design choices and lessons from the engineering review.
+
 ## Explore all 21 patterns
 
 Each folder contains a pattern explanation, a local implementation, basic and
